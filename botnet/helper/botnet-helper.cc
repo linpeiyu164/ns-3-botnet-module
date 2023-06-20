@@ -1,4 +1,5 @@
 #include "botnet-helper.h"
+#include "ns3/brite-module.h"
 
 #include <string>
 #include <cstdlib>
@@ -25,18 +26,19 @@ void BotnetHelper::SetupNodeMap(){
 }
 
 void BotnetHelper::CreateBotnet(
-    std::vector<NodeContainer*>& nodesByAs,
+    // std::vector<NodeContainer*>& nodesByAs,
+    Ptr<BriteTopologyHelper> bth,
     int maxBotsPerAs,
-    int type,
+    BotnetType type,
     std::string name)
 {
-    m_numAs = nodesByAs.size();
-    m_numPerAs = nodesByAs[0]->GetN();
+    m_numAs = bth->GetNAs();
+    m_numPerAs = bth->GetNNodesForAs(0);
     m_maxBotsPerAs = maxBotsPerAs;
 
     SetupNodeMap();
 
-    m_botnet = Botnet(type, name);
+    m_botnet = new Botnet(type, name);
 
     int asId, nodeId;
     int botId;
@@ -47,10 +49,24 @@ void BotnetHelper::CreateBotnet(
         for(nodeId = 0; nodeId < m_maxBotsPerAs; nodeId++){
             botId = rand() % m_numPerAs;
             if(!m_nodeMap[asId][botId]){
-                m_botnet.m_botNodes[asId]->Add(nodesByAs[asId]->Get(nodeId));
+                m_botnet->m_botNodes[asId]->Add(bth->GetNodeForAs(asId, nodeId));
             }
         }
     }
+
+    if(type == BotnetType::CENTRALIZED)
+    {
+        /* centralized */
+        /* choose bot master asId + nodeId */
+        asId = rand() % m_numAs;
+        nodeId = rand() % (m_botnet->m_botNodes[asId]->GetN());
+        m_botnet->m_botMaster = mbotnet->m_botNodes[asId]->Get(nodeId);
+    }
+
 }
+
+    void BotnetHelper::SetupAttack(){}
+
+    void BotnetHelper::LaunchAttack(){}
 
 }

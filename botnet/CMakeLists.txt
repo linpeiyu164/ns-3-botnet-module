@@ -14,7 +14,9 @@ build_lib(
     LIBNAME botnet
     SOURCE_FILES model/botnet.cc
                  helper/botnet-helper.cc
+                 model/attack.cc
     HEADER_FILES model/botnet.h
+                 model/attack.h
                  helper/botnet-helper.h
     LIBRARIES_TO_LINK ${libcore}
     TEST_SOURCES test/botnet-test-suite.cc
