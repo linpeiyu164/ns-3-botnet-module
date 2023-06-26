@@ -17,7 +17,7 @@ enum class BotnetType
 
 class Botnet{
     public:
-        Botnet(int type, std::string name);
+        Botnet(BotnetType type, std::string name);
         friend class BotnetHelper;
     private:
         std::vector<NodeContainer*> m_botNodes;

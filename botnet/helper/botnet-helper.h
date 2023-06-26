@@ -1,38 +1,54 @@
 #ifndef BOTNET_HELPER_H
 #define BOTNET_HELPER_H
 
-#include "botnet.h"
+#include "ns3/botnet.h"
 #include "ns3/brite-module.h"
+#include "ns3/application-container.h"
 
 namespace ns3
 {
+    /* Helps initialize the botnet and launch attacks */
+    class BotnetHelper{
+        public:
+            BotnetHelper();
 
-/* Helps initialize the botnet and launch attacks */
-class BotnetHelper{
-    public:
-        BotnetHelper();
+            /* creates botnet based on topology */
+            void CreateBotnet(
+                Ptr<BriteTopologyHelper> bth,
+                int maxBotsPerAS,
+                BotnetType type,
+                std::string name);
 
-        /* creates botnet based on topology */
-        void CreateBotnet(
-            Ptr<BriteTopologyHelper> bth,
-            int maxBotsPerAS,
-            BotnetType type,
-            std::string name);
+            void SetupAttack(std::string ccTypeId, std::string botTypeId);
 
-        void SetupAttack();
+            void LaunchAttack();
 
-        void LaunchAttack();
+        private:
+            Botnet *m_botnet;
+            int m_numAs;
+            int m_numPerAs;
+            int m_maxBotsPerAs;
+            std::vector<std::vector<int>> m_nodeMap;
+            ObjectFactory m_ccApp;
+            ObjectFactory m_botApp;
+            ApplicationContainer m_ccAppContainer;
+            ApplicationContainer m_botAppContainer;
 
-    private:
-        Botnet *m_botnet;
-        int m_numAs;
-        int m_numPerAs;
-        int m_maxBotsPerAs;
-        std::vector<std::vector<int>> m_nodeMap;
+            /* initializes node map, tracks bot assignment in topology */
+            void SetupNodeMap();
 
-        /* initializes node map, tracks bot assignment in topology */
-        void SetupNodeMap();
-};
+            ApplicationContainer ApplicationInstallBot(NodeContainer c) const;
+            ApplicationContainer ApplicationInstallBot(Ptr<Node> node) const;
+            Ptr<Application> InstallPrivBot(Ptr<Node> node) const;
+
+            ApplicationContainer ApplicationInstallCC(NodeContainer c) const;
+            ApplicationContainer ApplicationInstallCC(Ptr<Node> node) const;
+            Ptr<Application> InstallPrivCC(Ptr<Node> node) const;
+
+            void SetAttributeCC(std::string name, const AttributeValue& value);
+            void SetAttributeBot(std::string name, const AttributeValue& value);
+
+    };
 
 }
 

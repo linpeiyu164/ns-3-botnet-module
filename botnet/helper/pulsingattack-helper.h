@@ -11,7 +11,7 @@ namespace ns3
     class PulsingAttackCCHelper
     {
         public:
-            PulsingAttackCCHelper(Address address);
+            PulsingAttackCCHelper();
             ApplicationContainer Install(NodeContainer c) const;
             ApplicationContainer Install(Ptr<Node> node) const;
             void SetAttribute(std::string name, const AttributeValue& value);
@@ -23,7 +23,7 @@ namespace ns3
     class PulsingAttackBotHelper
     {
         public:
-            PulsingAttackBotHelper(Address address);
+            PulsingAttackBotHelper();
             ApplicationContainer Install(NodeContainer c) const;
             ApplicationContainer Install(Ptr<Node> node) const;
             void SetAttribute(std::string name, const AttributeValue& value);

@@ -13,12 +13,16 @@ endif()
 build_lib(
     LIBNAME botnet
     SOURCE_FILES model/botnet.cc
+                 model/pulsingattackcc.cc
+                 model/pulsingattackbot.cc
                  helper/botnet-helper.cc
-                 model/attack.cc
+                 helper/pulsingattack-helper.cc
     HEADER_FILES model/botnet.h
-                 model/attack.h
+                 model/pulsingattackcc.h
+                 model/pulsingattackbot.h
                  helper/botnet-helper.h
-    LIBRARIES_TO_LINK ${libcore}
+                 helper/pulsingattack-helper.h
+    LIBRARIES_TO_LINK ${libcore} ${libbrite}
     TEST_SOURCES test/botnet-test-suite.cc
                  ${examples_as_tests_sources}
 )

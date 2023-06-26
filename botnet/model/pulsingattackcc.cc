@@ -5,8 +5,6 @@
 #include <ns3/socket.h>
 #include <ns3/tcp-socket-factory.h>
 
-
-
 namespace ns3
 {
     TypeId PulsingAttackCC::GetTypeId()
@@ -31,7 +29,20 @@ namespace ns3
                         "Packet size",
                         UintegerValue(100),
                         MakeUintegerAccessor(&PulsingAttackCC::m_packet_size),
-                        MakeUintegerChecker<uint16_t>());
+                        MakeUintegerChecker<uint16_t>())
+                    .AddAttribute(
+                        "RemoteAddress",
+                        "Address of the node that will receive the packet",
+                        AddressValue(),
+                        MakeAddressAccessor(&PulsingAttackCC::m_remote_address),
+                        MakeAddressChecker())
+                    .AddAttribute(
+                        "RemotePort",
+                        "Port of the node that will receive the packet",
+                        UintegerValue(8080),
+                        MakeUintegerAccessor(&PulsingAttackCC::m_remote_port),
+                        MakeUintegerChecker<uint16_t>()
+                    );
 
         return tid;
     }
@@ -48,25 +59,25 @@ namespace ns3
     void PulsingAttackCC::StartApplication()
     {
         m_recv_socket = Socket::CreateSocket(GetNode(), TcpSocketFactory::GetTypeId());
-        m_recv_socket->SetRecvCallback(MakeCallback(&PulsingAttackCC::HandleReceive, this));
+        // m_recv_socket->SetRecvCallback(MakeCallback(&PulsingAttackCC::ReceivePacket, this));
         m_send_socket = Socket::CreateSocket(GetNode(), TcpSocketFactory::GetTypeId());
+        OpenConnection();
     }
 
-    // bool PulsingAttackCC::HandleReceive(Ptr<Socket> socket)
-    // {
-    //     Ptr<Packet> packet;
-    //     Address from;
-    //     Address localAddress;
-    //     while((packet = socket->RecvFrom(from)))
-    //     {
-    //         // logic...
-    //     }
-    // }
+    void PulsingAttackCC::StopApplication()
+    {
+        m_recv_socket->Close();
+        m_send_socket->Close();
+    }
+
     void PulsingAttackCC::OpenConnection()
     {
-        ret = m_send_socket -> Bind();
-
+        int ret = m_send_socket -> Bind();
+        Ipv4Address ipv4 = Ipv4Address::ConvertFrom(m_remote_address);
+        InetSocketAddress inetSocket = InetSocketAddress(ipv4, m_remote_port);
+        ret = m_send_socket->Connect(inetSocket);
     }
+
     void PulsingAttackCC::SendPacket()
     {
         Ptr<Packet> packet = Create<Packet>(m_packet_size); // packet size
@@ -75,8 +86,6 @@ namespace ns3
         int send_interval = 2;
         Time next_time(Seconds(Simulator::Now().GetSeconds() + send_interval));
         Simulator::Schedule(next_time, &PulsingAttackCC::SendPacket, this);
-        // Simulator.Schedule(next_send_time, &PulsingAttackCC::SendPacket, this);
     }
-
 
 }

@@ -18,18 +18,21 @@ namespace ns3
             void StopApplication();
 
         private:
-            void SetupReceiveSocket(Ptr<Socket>, uint16_t port);
-            /* schedule the next packet send */
-            void ScheduleTx();
-            /* send packet */
+            /* open the connection to remote address */
+            void OpenConnection();
+
+            /* send packet and schedule the next packet send */
             void SendPacket();
-            /* handle packet receive */
-            bool HandleReceive(Ptr<Socket> socket);
 
             Ptr<Socket> m_recv_socket;
             uint16_t m_recv_port;
+
             Ptr<Socket> m_send_socket;
             uint16_t m_send_port;
+
+            Address m_remote_address;
+            uint16_t m_remote_port;
+
             uint32_t m_packet_size;
     };
 }

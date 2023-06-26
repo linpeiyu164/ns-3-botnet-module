@@ -1,8 +1,11 @@
-#include "ns3/core-module.h"
 #include "ns3/botnet-helper.h"
-#include "ns3/brite-module.h"
+#include "ns3/core-module.h"
+#include "ns3/brite-topology-helper.h"
 #include "ns3/network-module.h"
 #include "ns3/point-to-point-module.h"
+#include "ns3/pulsingattack-helper.h"
+#include "ns3/packet-sink.h"
+#include "ns3/ipv4-address-helper.h"
 
 #include <fstream>
 #include <iostream>
@@ -62,13 +65,12 @@ main(int argc, char* argv[])
     BotnetHelper bnh;
     int maxBotsPerAs = 10;
     bnh.CreateBotnet(&bth, maxBotsPerAs, BotnetType::CENTRALIZED, "mybotnet");
-    
-    // PulsingAttackCC attkCC;
-    // PulsingAttackBot attkBot;
+    bnh.SetupAttack("ns3::PulsingAttackCC", "ns3::PulsingAttackBot");
 
+    /* Pulsing attack CC */
+    PulsingAttackCCHelper cch;
 
-
-    /* ... */
+    PulsingAttackBotHelper both;
 
     Simulator::Run();
     Simulator::Destroy();

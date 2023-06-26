@@ -5,7 +5,7 @@ namespace ns3
 {
 
 /* Pulsing Attack CC Helper */
-PulsingAttackCCHelper::PulsingAttackCCHelper(Address address)
+PulsingAttackCCHelper::PulsingAttackCCHelper()
 {
     m_factory.SetTypeId("ns3::PulsingAttackCC");
 }
@@ -41,7 +41,7 @@ Ptr<Application> PulsingAttackCCHelper::InstallPriv(Ptr<Node> node) const
 
 /* Pulsing Attack Bot Helper */
 
-PulsingAttackBotHelper::PulsingAttackBotHelper(Address address)
+PulsingAttackBotHelper::PulsingAttackBotHelper()
 {
     m_factory.SetTypeId("ns3::PulsingAttackBot");
 }
