@@ -1,4 +1,4 @@
-#include "pulsingattack-helper.h"
+#include "ns3/pulsingattack-helper.h"
 #include "ns3/inet-socket-address.h"
 
 namespace ns3

@@ -7,9 +7,12 @@
 
 namespace ns3
 {
+    NS_LOG_COMPONENT_DEFINE("PulsingAttackCC");
+    NS_OBJECT_ENSURE_REGISTERED(PulsingAttackCC);
+
     TypeId PulsingAttackCC::GetTypeId()
     {
-        static TypeId tid = TypeId("ns3:PulsingAttackCC")
+        static TypeId tid = TypeId("ns3::PulsingAttackCC")
                     .SetParent<Application>()
                     .AddConstructor<PulsingAttackCC>()
                     .AddAttribute(
@@ -49,15 +52,23 @@ namespace ns3
 
     TypeId PulsingAttackCC::GetInstanceTypeId() const
     {
+        NS_LOG_FUNCTION(this);
         return PulsingAttackCC::GetTypeId();
     }
 
-    PulsingAttackCC::PulsingAttackCC(){}
+    PulsingAttackCC::PulsingAttackCC()
+    {
+        NS_LOG_FUNCTION(this);
+    }
 
-    PulsingAttackCC::~PulsingAttackCC(){}
+    PulsingAttackCC::~PulsingAttackCC()
+    {
+        NS_LOG_FUNCTION(this);
+    }
 
     void PulsingAttackCC::StartApplication()
     {
+        NS_LOG_FUNCTION(this);
         m_recv_socket = Socket::CreateSocket(GetNode(), TcpSocketFactory::GetTypeId());
         // m_recv_socket->SetRecvCallback(MakeCallback(&PulsingAttackCC::ReceivePacket, this));
         m_send_socket = Socket::CreateSocket(GetNode(), TcpSocketFactory::GetTypeId());
@@ -66,12 +77,14 @@ namespace ns3
 
     void PulsingAttackCC::StopApplication()
     {
+        NS_LOG_FUNCTION(this);
         m_recv_socket->Close();
         m_send_socket->Close();
     }
 
     void PulsingAttackCC::OpenConnection()
     {
+        NS_LOG_FUNCTION(this);
         int ret = m_send_socket -> Bind();
         Ipv4Address ipv4 = Ipv4Address::ConvertFrom(m_remote_address);
         InetSocketAddress inetSocket = InetSocketAddress(ipv4, m_remote_port);
@@ -80,9 +93,12 @@ namespace ns3
 
     void PulsingAttackCC::SendPacket()
     {
-        Ptr<Packet> packet = Create<Packet>(m_packet_size); // packet size
+        NS_LOG_FUNCTION(this);
+        // send current packet
+        Ptr<Packet> packet = Create<Packet>(m_packet_size);
+        m_send_socket->Send(packet);
+
         // calculate next_send_time based on received RTT time from bots
-        m_send_socket -> Send(packet);
         int send_interval = 2;
         Time next_time(Seconds(Simulator::Now().GetSeconds() + send_interval));
         Simulator::Schedule(next_time, &PulsingAttackCC::SendPacket, this);

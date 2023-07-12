@@ -5,9 +5,12 @@
 
 namespace ns3
 {
+    NS_LOG_COMPONENT_DEFINE("PulsingAttackBot");
+    NS_OBJECT_ENSURE_REGISTERED(PulsingAttackBot);
+
     TypeId PulsingAttackBot::GetTypeId()
     {
-        static TypeId tid = TypeId("ns3:PulsingAttackBot")
+        static TypeId tid = TypeId("ns3::PulsingAttackBot")
                     .SetParent<Application>()
                     .AddConstructor<PulsingAttackBot>()
                     .AddAttribute(
@@ -33,17 +36,34 @@ namespace ns3
                         "Remote port that will receive the attack packets",
                         UintegerValue(8000),
                         MakeUintegerAccessor(&PulsingAttackBot::m_remote_port),
-                        MakeUintegerChecker<uint16_t>());
+                        MakeUintegerChecker<uint16_t>())
+                    .AddAttribute(
+                        "RemoteAddress",
+                        "Remote address that will receive the attack packets",
+                        AddressValue(),
+                        MakeAddressAccessor(&PulsingAttackBot::m_remote_address),
+                        MakeAddressChecker());
         return tid;
     }
 
     TypeId PulsingAttackBot::GetInstanceTypeId() const
     {
+        NS_LOG_FUNCTION(this);
         return PulsingAttackBot::GetTypeId();
+    }
+
+    PulsingAttackBot::PulsingAttackBot(){
+        NS_LOG_FUNCTION(this);
+    }
+
+    PulsingAttackBot::~PulsingAttackBot()
+    {
+        NS_LOG_FUNCTION(this);
     }
 
     void PulsingAttackBot::StartApplication()
     {
+        NS_LOG_FUNCTION(this);
         m_recv_socket = Socket::CreateSocket(GetNode(), TcpSocketFactory::GetTypeId());
         m_recv_socket->SetRecvCallback(MakeCallback(&PulsingAttackBot::ReceivePacket, this));
         m_send_socket = Socket::CreateSocket(GetNode(), TcpSocketFactory::GetTypeId());
@@ -52,12 +72,14 @@ namespace ns3
 
     void PulsingAttackBot::StopApplication()
     {
+        NS_LOG_FUNCTION(this);
         m_recv_socket->Close();
         m_send_socket->Close();
     }
 
     void PulsingAttackBot::OpenConnection()
     {
+        NS_LOG_FUNCTION(this);
         int ret = m_send_socket -> Bind();
         Ipv4Address ipv4 = Ipv4Address::ConvertFrom(m_remote_address);
         InetSocketAddress inetSocket = InetSocketAddress(ipv4, m_remote_port);
@@ -66,6 +88,7 @@ namespace ns3
 
     void PulsingAttackBot::SendPacket()
     {
+        NS_LOG_FUNCTION(this);
         Ptr<Packet> packet = Create<Packet>(m_packet_size);
         m_send_socket->Send(packet);
         // schedule the next send time
@@ -73,6 +96,7 @@ namespace ns3
 
     void PulsingAttackBot::ReceivePacket()
     {
+        NS_LOG_FUNCTION(this);
         // accept cc command
         Ptr<Packet> packet;
         Address from;

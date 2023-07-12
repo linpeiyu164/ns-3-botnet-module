@@ -1,3 +1,6 @@
+#ifndef PULSING_ATTACK_BOT_H
+#define PULSINE_ATTACK_BOT_H
+
 #include "ns3/application.h"
 #include "ns3/socket.h"
 
@@ -14,10 +17,11 @@ namespace ns3
             void StartApplication();
             void StopApplication();
 
-            void OpenConnection();
             void SendPacket();
             void ReceivePacket();
         private:
+            void OpenConnection();
+
             Address m_remote_address;
             uint16_t m_remote_port;
 
@@ -27,7 +31,9 @@ namespace ns3
             Ptr<Socket> m_recv_socket;
             uint16_t m_recv_port;
 
-            int16_t m_packet_size;
-            int16_t attack_interval;
+            uint16_t m_packet_size;
+            uint16_t m_attack_interval;
     };
 }
+
+#endif

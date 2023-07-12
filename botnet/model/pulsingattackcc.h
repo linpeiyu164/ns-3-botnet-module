@@ -1,5 +1,5 @@
-#ifndef ATTACK_H
-#define ATTACK_H
+#ifndef PULSING_ATTACK_CC_H
+#define PULSING_ATTACK_CC_H
 #include "ns3/application.h"
 #include "ns3/socket.h"
 

@@ -10,19 +10,57 @@ if(${ENABLE_EXAMPLES})
         )
 endif()
 
+find_external_library(
+  DEPENDENCY_NAME brite
+  HEADER_NAME Brite.h
+  LIBRARY_NAME brite
+  SEARCH_PATHS ${NS3_WITH_BRITE}
+)
+
+if((NOT
+    brite_FOUND)
+   OR (NOT
+       ${brite_FOUND})
+)
+  message(
+    ${HIGHLIGHTED_STATUS}
+    "BRITE NOT FOUND"
+  )
+  return()
+endif()
+
+include_directories(${brite_INCLUDE_DIRS})
+set(NS3_BRITE
+    "ON"
+    CACHE INTERNAL
+          "ON if Brite is found in NS3_WITH_BRITE"
+)
+
+set(source_files
+    model/botnet.cc
+    model/pulsingattackcc.cc
+    model/pulsingattackbot.cc
+    helper/botnet-helper.cc
+    helper/pulsingattack-helper.cc)
+
+set(header_files
+    model/botnet.h
+    model/pulsingattackcc.h
+    model/pulsingattackbot.h
+    helper/botnet-helper.h
+    helper/pulsingattack-helper.h)
+
 build_lib(
     LIBNAME botnet
-    SOURCE_FILES model/botnet.cc
-                 model/pulsingattackcc.cc
-                 model/pulsingattackbot.cc
-                 helper/botnet-helper.cc
-                 helper/pulsingattack-helper.cc
-    HEADER_FILES model/botnet.h
-                 model/pulsingattackcc.h
-                 model/pulsingattackbot.h
-                 helper/botnet-helper.h
-                 helper/pulsingattack-helper.h
-    LIBRARIES_TO_LINK ${libcore} ${libbrite}
+    SOURCE_FILES ${source_files}
+    HEADER_FILES ${header_files}
+    LIBRARIES_TO_LINK
+        ${libbrite}
+        ${libinternet}
+        ${libpoint-to-point}
+        ${libnix-vector-routing}
+        ${libapplications}
+        ${brite_LIBRARIES}
     TEST_SOURCES test/botnet-test-suite.cc
                  ${examples_as_tests_sources}
 )

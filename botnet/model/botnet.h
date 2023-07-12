@@ -19,11 +19,12 @@ class Botnet{
     public:
         Botnet(BotnetType type, std::string name);
         friend class BotnetHelper;
+        uint32_t m_size;
     private:
         std::vector<NodeContainer*> m_botNodes;
         BotnetType m_type;
         std::string m_name;
-        Node *m_botMaster;
+        Ptr<Node> m_botMaster;
 };
 
 }

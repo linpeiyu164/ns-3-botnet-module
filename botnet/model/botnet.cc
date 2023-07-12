@@ -1,4 +1,4 @@
-#include "botnet.h"
+#include "ns3/botnet.h"
 #include "string.h"
 
 namespace ns3
@@ -7,5 +7,6 @@ namespace ns3
         m_type = type;
         m_name = name;
         m_botMaster = NULL;
+        m_size = 0;
     }
 }
