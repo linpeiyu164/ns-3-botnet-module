@@ -36,9 +36,9 @@ namespace ns3
                     .AddAttribute(
                         "RemoteAddress",
                         "Address of the node that will receive the packet",
-                        AddressValue(),
-                        MakeAddressAccessor(&PulsingAttackCC::m_remote_address),
-                        MakeAddressChecker())
+                        Ipv4AddressValue(),
+                        MakeIpv4AddressAccessor(&PulsingAttackCC::m_remote_address),
+                        MakeIpv4AddressChecker())
                     .AddAttribute(
                         "RemotePort",
                         "Port of the node that will receive the packet",
@@ -86,9 +86,16 @@ namespace ns3
     {
         NS_LOG_FUNCTION(this);
         int ret = m_send_socket -> Bind();
-        Ipv4Address ipv4 = Ipv4Address::ConvertFrom(m_remote_address);
-        InetSocketAddress inetSocket = InetSocketAddress(ipv4, m_remote_port);
-        ret = m_send_socket->Connect(inetSocket);
+        if(Ipv4Address::IsMatchingType(m_remote_address))
+        {
+            Ipv4Address ipv4 = Ipv4Address::ConvertFrom(m_remote_address);
+            InetSocketAddress inetSocket = InetSocketAddress(ipv4, m_remote_port);
+            ret = m_send_socket->Connect(inetSocket);
+        }
+        else
+        {
+            NS_LOG_ERROR("Not ipv4 type");
+        }
     }
 
     void PulsingAttackCC::SendPacket()

@@ -30,7 +30,7 @@ namespace ns3
             Ptr<Socket> m_send_socket;
             uint16_t m_send_port;
 
-            Address m_remote_address;
+            Ipv4Address m_remote_address;
             uint16_t m_remote_port;
 
             uint32_t m_packet_size;

@@ -22,7 +22,7 @@ namespace ns3
         private:
             void OpenConnection();
 
-            Address m_remote_address;
+            Ipv4Address m_remote_address;
             uint16_t m_remote_port;
 
             Ptr<Socket> m_send_socket;

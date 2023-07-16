@@ -19,10 +19,9 @@ int
 main(int argc, char* argv[])
 {
     LogComponentEnable("BotnetHelper", LOG_ALL);
-    // LogComponentEnable("Ipv4AddressHelper", LOG_ALL);
+    LogComponentEnable("Address", LOG_ALL);
     LogComponentEnable("BotnetExample", LOG_ALL);
     LogComponentEnable("Ipv4Address", LOG_ALL);
-    // LogComponentEnable("Simulator", LOG_ALL);
     LogComponentEnable("DefaultSimulatorImpl", LOG_INFO);
     LogComponentEnable("PulsingAttackCC", LOG_ALL);
     LogComponentEnable("PulsingAttackBot", LOG_ALL);
@@ -76,8 +75,9 @@ main(int argc, char* argv[])
     int maxBotsPerAs = 10;
     bnh.CreateBotnet(&bth, maxBotsPerAs, BotnetType::CENTRALIZED, "mybotnet");
     bnh.SetupAttack("ns3::PulsingAttackCC", "ns3::PulsingAttackBot");
-    bnh.SetAttributeCC("RemoteAddress", AddressValue(targetNetwork.Get(0)->GetDevice(0)->GetAddress()));
-    bnh.SetAttributeBot("RemoteAddress", AddressValue(targetNetwork.Get(0)->GetDevice(0)->GetAddress()));
+
+    bnh.SetAttributeCC("RemoteAddress", Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0)));
+    bnh.SetAttributeBot("RemoteAddress", Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0)));
 
     Simulator::Run();
     Simulator::Destroy();

@@ -40,9 +40,9 @@ namespace ns3
                     .AddAttribute(
                         "RemoteAddress",
                         "Remote address that will receive the attack packets",
-                        AddressValue(),
-                        MakeAddressAccessor(&PulsingAttackBot::m_remote_address),
-                        MakeAddressChecker());
+                        Ipv4AddressValue(),
+                        MakeIpv4AddressAccessor(&PulsingAttackBot::m_remote_address),
+                        MakeIpv4AddressChecker());
         return tid;
     }
 
@@ -80,8 +80,14 @@ namespace ns3
     void PulsingAttackBot::OpenConnection()
     {
         NS_LOG_FUNCTION(this);
-        int ret = m_send_socket -> Bind();
+        int ret = m_send_socket->Bind();
+        if(ret < 0)
+        {
+            NS_LOG_ERROR("failed to bind socket");
+        }
+        NS_LOG_DEBUG("address: " << m_remote_address);
         Ipv4Address ipv4 = Ipv4Address::ConvertFrom(m_remote_address);
+        NS_LOG_DEBUG("converted address");
         InetSocketAddress inetSocket = InetSocketAddress(ipv4, m_remote_port);
         ret = m_send_socket->Connect(inetSocket);
     }
