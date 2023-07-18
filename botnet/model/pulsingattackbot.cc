@@ -79,30 +79,32 @@ namespace ns3
         int ret = m_send_socket->Bind();
         if(ret < 0)
         {
-            NS_LOG_ERROR("failed to bind socket");
+            NS_LOG_ERROR("Error: Failed to bind socket");
         }
         else
         {
-            NS_LOG_INFO("socket bound");
+            NS_LOG_INFO("Socket bound");
         }
 
-        Ipv4Address ipv4 = Ipv4Address::ConvertFrom(m_remote_address);
-        InetSocketAddress inetSocket = InetSocketAddress(ipv4, m_remote_port);
-        Address remoteAddress(inetSocket);
-
-        // NS_LOG_DEBUG("Remote address passed in: " << m_remote_address);
-        // NS_LOG_DEBUG("Convert to Ipv4 address: " << ipv4);
-        // NS_LOG_DEBUG("Opened connection to: " << inetSocket);
-        // NS_LOG_DEBUG("Remote address: " << remoteAddress);
-
-        ret = m_send_socket->Connect(remoteAddress);
-        if(ret < 0)
+        if(Ipv4Address::IsMatchingType(m_remote_address))
         {
-            NS_LOG_ERROR("Error: Bot: Connection failed");
+            Ipv4Address ipv4 = Ipv4Address::ConvertFrom(m_remote_address);
+            InetSocketAddress inetSocket = InetSocketAddress(ipv4, m_remote_port);
+            Address remoteAddress(inetSocket);
+
+            ret = m_send_socket->Connect(remoteAddress);
+            if(ret < 0)
+            {
+                NS_LOG_ERROR("Error: Connection failed");
+            }
+            else
+            {
+                NS_LOG_INFO("Bot connected");
+            }
         }
         else
         {
-            NS_LOG_INFO("Bot connected");
+            NS_LOG_ERROR("Error: Address incompatible with Ipv4");
         }
     }
 

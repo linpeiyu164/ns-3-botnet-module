@@ -91,17 +91,16 @@ namespace ns3
         int ret = m_send_socket->Bind();
         if(ret < 0)
         {
-            NS_LOG_ERROR("PulsingAttackCC: Binding failed");
+            NS_LOG_ERROR("Error: Binding failed");
         }
         else
         {
-            NS_LOG_INFO("PulsingAttackCC: Binding successful");
+            NS_LOG_INFO("Socket bound");
         }
 
         // connect to remote address
         if(Ipv4Address::IsMatchingType(m_remote_address))
         {
-            NS_LOG_INFO("Opening connection to: " << m_remote_address);
             InetSocketAddress inetSocket = InetSocketAddress(m_remote_address, m_remote_port);
             Address remoteAddress(inetSocket);
 
@@ -113,16 +112,16 @@ namespace ns3
             ret = m_send_socket->Connect(remoteAddress);
             if(ret < 0)
             {
-                NS_LOG_ERROR("Error: PulsingAttackCC: Connection failed");
+                NS_LOG_ERROR("Error: Connection failed");
             }
             else
             {
-                NS_LOG_INFO("CC is connected to " << remoteAddress);
+                NS_LOG_INFO("CC Connected");
             }
         }
         else
         {
-            NS_LOG_ERROR("Not ipv4 type");
+            NS_LOG_ERROR("Error: Address incompatible with Ipv4");
         }
     }
 
