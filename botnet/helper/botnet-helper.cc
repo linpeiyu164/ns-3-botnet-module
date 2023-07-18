@@ -149,24 +149,29 @@ namespace ns3
 
     void BotnetHelper::SetupAttack(std::string ccTypeId, std::string botTypeId)
     {
-        NS_LOG_FUNCTION(this);
+        NS_LOG_FUNCTION(this << ccTypeId << botTypeId);
         // Application types defined
         m_ccApp.SetTypeId(ccTypeId);
         m_botApp.SetTypeId(botTypeId);
 
+
+    }
+
+    void BotnetHelper::InstallAttack()
+    {
         m_botAppContainer = ApplicationInstallBot(m_botnet->m_botNodes);
         m_ccAppContainer = ApplicationInstallCC(m_botnet->m_botMaster);
     }
 
     void BotnetHelper::SetAttributeCC(std::string name, const AttributeValue& value)
     {
-        NS_LOG_FUNCTION(this);
+        NS_LOG_FUNCTION(this << name << &value);
         m_ccApp.Set(name, value);
     }
 
     void BotnetHelper::SetAttributeBot(std::string name, const AttributeValue& value)
     {
-        NS_LOG_FUNCTION(this);
+        NS_LOG_FUNCTION(this << name << &value);
         m_botApp.Set(name, value);
     }
 }

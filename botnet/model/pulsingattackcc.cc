@@ -42,7 +42,7 @@ namespace ns3
                     .AddAttribute(
                         "RemotePort",
                         "Port of the node that will receive the packet",
-                        UintegerValue(8080),
+                        UintegerValue(8081),
                         MakeUintegerAccessor(&PulsingAttackCC::m_remote_port),
                         MakeUintegerChecker<uint16_t>()
                     );
@@ -73,6 +73,7 @@ namespace ns3
         // m_recv_socket->SetRecvCallback(MakeCallback(&PulsingAttackCC::ReceivePacket, this));
         m_send_socket = Socket::CreateSocket(GetNode(), TcpSocketFactory::GetTypeId());
         OpenConnection();
+        SendPacket();
     }
 
     void PulsingAttackCC::StopApplication()
@@ -85,12 +86,39 @@ namespace ns3
     void PulsingAttackCC::OpenConnection()
     {
         NS_LOG_FUNCTION(this);
-        int ret = m_send_socket -> Bind();
+
+        // bind socket
+        int ret = m_send_socket->Bind();
+        if(ret < 0)
+        {
+            NS_LOG_ERROR("PulsingAttackCC: Binding failed");
+        }
+        else
+        {
+            NS_LOG_INFO("PulsingAttackCC: Binding successful");
+        }
+
+        // connect to remote address
         if(Ipv4Address::IsMatchingType(m_remote_address))
         {
-            Ipv4Address ipv4 = Ipv4Address::ConvertFrom(m_remote_address);
-            InetSocketAddress inetSocket = InetSocketAddress(ipv4, m_remote_port);
-            ret = m_send_socket->Connect(inetSocket);
+            NS_LOG_INFO("Opening connection to: " << m_remote_address);
+            InetSocketAddress inetSocket = InetSocketAddress(m_remote_address, m_remote_port);
+            Address remoteAddress(inetSocket);
+
+            // NS_LOG_DEBUG("Remote address passed in: " << m_remote_address);
+            // NS_LOG_DEBUG("Convert to Ipv4 address: " << ipv4);
+            // NS_LOG_DEBUG("INET SOCKET: " << inetSocket);
+            // NS_LOG_DEBUG("Opened connection to: " << remoteAddress);
+
+            ret = m_send_socket->Connect(remoteAddress);
+            if(ret < 0)
+            {
+                NS_LOG_ERROR("Error: PulsingAttackCC: Connection failed");
+            }
+            else
+            {
+                NS_LOG_INFO("CC is connected to " << remoteAddress);
+            }
         }
         else
         {
@@ -108,7 +136,7 @@ namespace ns3
         // calculate next_send_time based on received RTT time from bots
         int send_interval = 2;
         Time next_time(Seconds(Simulator::Now().GetSeconds() + send_interval));
-        Simulator::Schedule(next_time, &PulsingAttackCC::SendPacket, this);
+        // Simulator::Schedule(next_time, &PulsingAttackCC::SendPacket, this);
     }
 
 }

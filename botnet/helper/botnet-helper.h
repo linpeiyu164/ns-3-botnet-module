@@ -20,7 +20,7 @@ namespace ns3
                 std::string name);
 
             void SetupAttack(std::string ccTypeId, std::string botTypeId);
-
+            void InstallAttack();
             void LaunchAttack();
 
         private:

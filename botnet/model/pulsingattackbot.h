@@ -6,7 +6,8 @@
 
 namespace ns3
 {
-    class PulsingAttackBot: public Application{
+    class PulsingAttackBot: public Application
+    {
         public:
             PulsingAttackBot();
             virtual ~PulsingAttackBot();
@@ -26,7 +27,6 @@ namespace ns3
             uint16_t m_remote_port;
 
             Ptr<Socket> m_send_socket;
-            uint16_t m_send_port;
 
             Ptr<Socket> m_recv_socket;
             uint16_t m_recv_port;
