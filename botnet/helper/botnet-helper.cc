@@ -153,8 +153,6 @@ namespace ns3
         // Application types defined
         m_ccApp.SetTypeId(ccTypeId);
         m_botApp.SetTypeId(botTypeId);
-
-
     }
 
     void BotnetHelper::InstallAttack()

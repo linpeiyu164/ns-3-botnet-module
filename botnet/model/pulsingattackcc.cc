@@ -16,12 +16,6 @@ namespace ns3
                     .SetParent<Application>()
                     .AddConstructor<PulsingAttackCC>()
                     .AddAttribute(
-                        "SendPort",
-                        "Sending port",
-                        UintegerValue(8000),
-                        MakeUintegerAccessor(&PulsingAttackCC::m_send_port),
-                        MakeUintegerChecker<uint16_t>())
-                    .AddAttribute(
                         "ReceivePort",
                         "Receiving port",
                         UintegerValue(8080),
@@ -104,11 +98,6 @@ namespace ns3
             InetSocketAddress inetSocket = InetSocketAddress(m_remote_address, m_remote_port);
             Address remoteAddress(inetSocket);
 
-            // NS_LOG_DEBUG("Remote address passed in: " << m_remote_address);
-            // NS_LOG_DEBUG("Convert to Ipv4 address: " << ipv4);
-            // NS_LOG_DEBUG("INET SOCKET: " << inetSocket);
-            // NS_LOG_DEBUG("Opened connection to: " << remoteAddress);
-
             ret = m_send_socket->Connect(remoteAddress);
             if(ret < 0)
             {
@@ -128,7 +117,7 @@ namespace ns3
     void PulsingAttackCC::SendPacket()
     {
         NS_LOG_FUNCTION(this);
-        // send current packet
+
         Ptr<Packet> packet = Create<Packet>(m_packet_size);
         m_send_socket->Send(packet);
 

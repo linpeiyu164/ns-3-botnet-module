@@ -21,7 +21,9 @@ namespace ns3
 
             void SetupAttack(std::string ccTypeId, std::string botTypeId);
             void InstallAttack();
-            void LaunchAttack();
+
+            ApplicationContainer ApplicationInstallBot(std::vector<NodeContainer*>& c) const;
+            ApplicationContainer ApplicationInstallCC(NodeContainer c) const;
 
         private:
             Botnet *m_botnet;
@@ -37,11 +39,9 @@ namespace ns3
             /* initializes node map, tracks bot assignment in topology */
             void SetupNodeMap();
 
-            ApplicationContainer ApplicationInstallBot(std::vector<NodeContainer*>& c) const;
             ApplicationContainer ApplicationInstallBot(Ptr<Node> node) const;
             Ptr<Application> InstallPrivBot(Ptr<Node> node) const;
 
-            ApplicationContainer ApplicationInstallCC(NodeContainer c) const;
             ApplicationContainer ApplicationInstallCC(Ptr<Node> node) const;
             Ptr<Application> InstallPrivCC(Ptr<Node> node) const;
         public:

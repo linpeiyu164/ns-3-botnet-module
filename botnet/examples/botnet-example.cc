@@ -19,21 +19,13 @@ NS_LOG_COMPONENT_DEFINE("BotnetExample");
 
 void targetRx(Ptr<const Packet> packet, const Address& address)
 {
-    NS_LOG_INFO("BLEHHHHH");
     NS_LOG_INFO("Target received packet of " << packet->GetSize() << "bytes from " << address);
 }
 
 int
 main(int argc, char* argv[])
 {
-    // LogComponentEnable("BotnetHelper", LOG_ALL);
-    // LogComponentEnable("Address", LOG_ALL);
     LogComponentEnable("BotnetExample", LOG_ALL);
-    // LogComponentEnable("Ipv4RawSocketImpl", LOG_ALL);
-    // LogComponentEnable("PacketSocket", LOG_ALL);
-    // LogComponentEnable("TcpSocketBase", LOG_ALL);
-    // LogComponentEnable("TcpSocket", LOG_ALL);
-
     LogComponentEnable("PulsingAttackCC", LOG_ALL);
     LogComponentEnable("PulsingAttackBot", LOG_ALL);
     LogComponentEnable("PacketSink", LOG_ALL);
