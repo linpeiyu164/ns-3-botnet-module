@@ -82,14 +82,16 @@ main(int argc, char* argv[])
     BotnetHelper bnh;
     int maxBotsPerAs = 10;
     bnh.CreateBotnet(&bth, maxBotsPerAs, BotnetType::CENTRALIZED, "mybotnet");
-    bnh.SetupAttack("ns3::PulsingAttackCC", "ns3::PulsingAttackBot");
+    // bnh.SetupAttack("ns3::PulsingAttackCC", "ns3::PulsingAttackBot");
+    bnh.AddApplication(BotType::CENTRAL_CONTROLLER, "ns3::PulsingAttackCC");
+    bnh.AddApplication(BotType::BOT, "ns3::PulsingAttackBot");
 
-    bnh.SetAttributeCC("StartTime", TimeValue(Seconds(10.0)));
-    bnh.SetAttributeBot("StartTime", TimeValue(Seconds(10.0)));
-    bnh.SetAttributeCC("RemoteAddress", Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0, 0)));
-    bnh.SetAttributeBot("RemoteAddress", Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0, 0)));
+    bnh.SetAttributeCC(0, "StartTime", TimeValue(Seconds(10.0)));
+    bnh.SetAttributeBot(0, "StartTime", TimeValue(Seconds(10.0)));
+    bnh.SetAttributeCC(0, "RemoteAddress", Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0, 0)));
+    bnh.SetAttributeBot(0, "RemoteAddress", Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0, 0)));
 
-    bnh.InstallAttack();
+    bnh.InstallApplications();
 
     Simulator::Run();
     Simulator::Destroy();

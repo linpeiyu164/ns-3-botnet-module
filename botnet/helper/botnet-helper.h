@@ -7,6 +7,12 @@
 
 namespace ns3
 {
+    enum class BotType
+    {
+        CENTRAL_CONTROLLER,
+        BOT
+    };
+
     /* Helps initialize the botnet and launch attacks */
     class BotnetHelper{
         public:
@@ -19,8 +25,18 @@ namespace ns3
                 BotnetType type,
                 std::string name);
 
-            void SetupAttack(std::string ccTypeId, std::string botTypeId);
-            void InstallAttack();
+            // void SetupAttack(std::string ccTypeId, std::string botTypeId);
+
+            // add app to the object factory vector
+            void SetupApplicationBot(std::string typeId);
+
+            // add app to object factory vector
+            void SetupApplicationCC(std::string typeId);
+
+            // install all cc and bot applications
+            void InstallApplications();
+
+            void AddApplication(BotType type, std::string);
 
             ApplicationContainer ApplicationInstallBot(std::vector<NodeContainer*>& c) const;
             ApplicationContainer ApplicationInstallCC(NodeContainer c) const;
@@ -31,8 +47,8 @@ namespace ns3
             int m_numPerAs;
             int m_maxBotsPerAs;
             std::vector<std::vector<int>> m_nodeMap;
-            ObjectFactory m_ccApp;
-            ObjectFactory m_botApp;
+            std::vector<ObjectFactory> m_ccApps;
+            std::vector<ObjectFactory> m_botApps;
             ApplicationContainer m_ccAppContainer;
             ApplicationContainer m_botAppContainer;
 
@@ -40,13 +56,14 @@ namespace ns3
             void SetupNodeMap();
 
             ApplicationContainer ApplicationInstallBot(Ptr<Node> node) const;
-            Ptr<Application> InstallPrivBot(Ptr<Node> node) const;
+            ApplicationContainer InstallPrivBot(Ptr<Node> node) const;
 
             ApplicationContainer ApplicationInstallCC(Ptr<Node> node) const;
-            Ptr<Application> InstallPrivCC(Ptr<Node> node) const;
+            ApplicationContainer InstallPrivCC(Ptr<Node> node) const;
+
         public:
-            void SetAttributeCC(std::string name, const AttributeValue& value);
-            void SetAttributeBot(std::string name, const AttributeValue& value);
+            void SetAttributeCC(uint16_t appIndex, std::string name, const AttributeValue& value);
+            void SetAttributeBot(uint16_t appIndex, std::string name, const AttributeValue& value);
 
     };
 

@@ -88,6 +88,26 @@ namespace ns3
 
     }
 
+    void BotnetHelper::AddApplication(BotType type, std::string typeId)
+    {
+        ObjectFactory app;
+
+        if(type == BotType::BOT)
+        {
+            m_botApps.push_back(app);
+            m_botApps[m_botApps.size()-1].SetTypeId(typeId);
+        }
+        else if(type == BotType::CENTRAL_CONTROLLER)
+        {
+            m_ccApps.push_back(app);
+            m_ccApps[m_ccApps.size()-1].SetTypeId(typeId);
+        }
+        else
+        {
+            NS_LOG_ERROR("Error: no BotType " << uint16_t(type));
+        }
+    }
+
     ApplicationContainer BotnetHelper::ApplicationInstallBot(std::vector<NodeContainer*>& vc) const
     {
         NS_LOG_FUNCTION(this);
@@ -110,13 +130,19 @@ namespace ns3
         return ApplicationContainer(InstallPrivBot(node));
     }
 
-    Ptr<Application> BotnetHelper::InstallPrivBot(Ptr<Node> node) const
+    ApplicationContainer BotnetHelper::InstallPrivBot(Ptr<Node> node) const
     {
         NS_LOG_FUNCTION(this);
-        Ptr<Application> app = m_botApp.Create<Application>();
-        node->AddApplication(app);
+        ApplicationContainer apps;
 
-        return app;
+        for(auto it = m_botApps.begin(); it != m_botApps.end(); it++)
+        {
+            Ptr<Application> app = it->Create<Application>();
+            node->AddApplication(app);
+            apps.Add(app);
+        }
+
+        return apps;
     }
 
     ApplicationContainer BotnetHelper::ApplicationInstallCC(NodeContainer c) const
@@ -138,38 +164,45 @@ namespace ns3
         return ApplicationContainer(InstallPrivCC(node));
     }
 
-    Ptr<Application> BotnetHelper::InstallPrivCC(Ptr<Node> node) const
+    ApplicationContainer BotnetHelper::InstallPrivCC(Ptr<Node> node) const
     {
         NS_LOG_FUNCTION(this);
-        Ptr<Application> app = m_ccApp.Create<Application>();
-        node->AddApplication(app);
+        ApplicationContainer apps;
+        for(auto it = m_ccApps.begin(); it != m_ccApps.end(); it++)
+        {
+            Ptr<Application> app = it->Create<Application>();
+            node->AddApplication(app);
+            apps.Add(app);
+        }
 
-        return app;
+        return apps;
     }
 
-    void BotnetHelper::SetupAttack(std::string ccTypeId, std::string botTypeId)
-    {
-        NS_LOG_FUNCTION(this << ccTypeId << botTypeId);
-        // Application types defined
-        m_ccApp.SetTypeId(ccTypeId);
-        m_botApp.SetTypeId(botTypeId);
-    }
+    // void BotnetHelper::SetupAttack(std::string ccTypeId, std::string botTypeId)
+    // {
+    //     NS_LOG_FUNCTION(this << ccTypeId << botTypeId);
+    //     // Application types defined
+    //     AddApplication(BotType::CENTRAL_CONTROLLER, ccTypeId);
+    //     AddApplication(BotType::BOT, botTypeId);
+    // }
 
-    void BotnetHelper::InstallAttack()
+    void BotnetHelper::InstallApplications()
     {
         m_botAppContainer = ApplicationInstallBot(m_botnet->m_botNodes);
         m_ccAppContainer = ApplicationInstallCC(m_botnet->m_botMaster);
     }
 
-    void BotnetHelper::SetAttributeCC(std::string name, const AttributeValue& value)
+    void BotnetHelper::SetAttributeCC(uint16_t appIndex, std::string name, const AttributeValue& value)
     {
-        NS_LOG_FUNCTION(this << name << &value);
-        m_ccApp.Set(name, value);
+        // appIndex: the index of the application in m_ccApps
+        NS_LOG_FUNCTION(this << appIndex << name << &value);
+        m_ccApps[appIndex].Set(name, value);
     }
 
-    void BotnetHelper::SetAttributeBot(std::string name, const AttributeValue& value)
+    void BotnetHelper::SetAttributeBot(uint16_t appIndex, std::string name, const AttributeValue& value)
     {
-        NS_LOG_FUNCTION(this << name << &value);
-        m_botApp.Set(name, value);
+        // appIndex: the index of the application in m_ccApps
+        NS_LOG_FUNCTION(this << appIndex << name << &value);
+        m_botApps[appIndex].Set(name, value);
     }
 }
