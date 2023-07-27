@@ -210,6 +210,6 @@ namespace ns3
 
     Ipv4Address BotnetHelper::GetBotMasterAddress(uint16_t netDeviceIndex)
     {
-        return Ipv4Address::ConvertFrom(m_botnet->m_botMaster->GetObject<Ipv4>()->GetAddress(0,0).GetLocal());
+        return Ipv4Address::ConvertFrom(m_botnet->m_botMaster->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal());
     }
 }

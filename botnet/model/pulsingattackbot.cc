@@ -26,24 +26,24 @@ namespace ns3
                         MakeUintegerAccessor(&PulsingAttackBot::m_packet_size),
                         MakeUintegerChecker<uint16_t>())
                     .AddAttribute(
-                        "RemotePort",
-                        "Remote port that will receive the attack packets",
+                        "TargetPort",
+                        "Target port that will receive the attack packets",
                         UintegerValue(8081),
-                        MakeUintegerAccessor(&PulsingAttackBot::m_remote_port),
+                        MakeUintegerAccessor(&PulsingAttackBot::m_target_port),
                         MakeUintegerChecker<uint16_t>())
                     .AddAttribute(
-                        "RemoteAddress",
-                        "Remote address that will receive the attack packets",
+                        "TargetAddress",
+                        "Target address that will receive the attack packets",
                         Ipv4AddressValue(),
-                        MakeIpv4AddressAccessor(&PulsingAttackBot::m_remote_address),
-                        MakeIpv4AddressChecker());
-                    // .AddAttribute(
-                    //     "CCAddress",
-                    //     "CC address",
-                    //     Ipv4AddressValue(),
-                    //     MakeIpv4AddressAccessor(&PulsingAttackBot::m_cc_address),
-                    //     MakeIpv4AddressChecker()
-                    // );
+                        MakeIpv4AddressAccessor(&PulsingAttackBot::m_target_address),
+                        MakeIpv4AddressChecker())
+                    .AddAttribute(
+                        "CCAddress",
+                        "CC address",
+                        Ipv4AddressValue(),
+                        MakeIpv4AddressAccessor(&PulsingAttackBot::m_cc_address),
+                        MakeIpv4AddressChecker()
+                    );
         return tid;
     }
 
@@ -67,39 +67,43 @@ namespace ns3
     {
         NS_LOG_FUNCTION(this);
         m_recv_socket = Socket::CreateSocket(GetNode(), TcpSocketFactory::GetTypeId());
-        m_recv_socket->SetRecvCallback(MakeCallback(&PulsingAttackBot::ReceivePacket, this));
-        m_send_socket = Socket::CreateSocket(GetNode(), TcpSocketFactory::GetTypeId());
-        OpenConnection();
-        SendPacket();
+        m_recv_socket->SetRecvCallback(MakeCallback(&PulsingAttackBot::ReceivePacketCC, this));
+        m_target_socket = Socket::CreateSocket(GetNode(), TcpSocketFactory::GetTypeId());
+        m_cc_socket = Socket::CreateSocket(GetNode(), TcpSocketFactory::GetTypeId());
+        OpenConnection(m_cc_socket, m_cc_address, m_cc_port);
+        // OpenConnection(m_target_socket, m_target_address, m_target_port);
+        Ptr<Packet> packet = Create<Packet>(m_packet_size);
+        SendPacket(m_cc_socket, packet);
     }
 
     void PulsingAttackBot::StopApplication()
     {
         NS_LOG_FUNCTION(this);
         m_recv_socket->Close();
-        m_send_socket->Close();
+        m_target_socket->Close();
+        m_cc_socket->Close();
     }
 
-    void PulsingAttackBot::OpenConnection()
+    void PulsingAttackBot::OpenConnection(Ptr<Socket> socket, Ipv4Address addr, uint16_t port)
     {
         NS_LOG_FUNCTION(this);
-        int ret = m_send_socket->Bind();
+        int ret = socket->Bind();
         if(ret < 0)
         {
-            NS_LOG_ERROR("Error: Failed to bind socket");
+            NS_LOG_ERROR("Error: Failed to bind socket to target");
         }
         else
         {
-            NS_LOG_INFO("Socket bound");
+            NS_LOG_INFO("Socket bound to target");
         }
 
-        if(Ipv4Address::IsMatchingType(m_remote_address))
+        if(Ipv4Address::IsMatchingType(addr))
         {
-            Ipv4Address ipv4 = Ipv4Address::ConvertFrom(m_remote_address);
-            InetSocketAddress inetSocket = InetSocketAddress(ipv4, m_remote_port);
-            Address remoteAddress(inetSocket);
+            Ipv4Address ipv4 = Ipv4Address::ConvertFrom(addr);
+            InetSocketAddress inetSocket = InetSocketAddress(ipv4, port);
+            Address address(inetSocket);
 
-            ret = m_send_socket->Connect(remoteAddress);
+            ret = socket->Connect(address);
             if(ret < 0)
             {
                 NS_LOG_ERROR("Error: Connection failed");
@@ -115,16 +119,15 @@ namespace ns3
         }
     }
 
-    void PulsingAttackBot::SendPacket()
+    void PulsingAttackBot::SendPacket(Ptr<Socket> socket, Ptr<Packet> packet)
     {
         NS_LOG_FUNCTION(this);
-        char buf[m_packet_size-1] = {'a'};
-        Ptr<Packet> packet = Create<Packet>((const uint8_t*)buf, m_packet_size);
-        m_send_socket->Send(packet);
+        // Ptr<Packet> packet = Create<Packet>(m_packet_size);
+        socket->Send(packet);
         // schedule the next send time
     }
 
-    void PulsingAttackBot::ReceivePacket()
+    void PulsingAttackBot::ReceivePacketCC()
     {
         NS_LOG_FUNCTION(this);
         // accept cc command
@@ -142,6 +145,14 @@ namespace ns3
             }
             // schedule SendPacket based on received information
         }
+
+        Ptr<Packet> targetPacket = Create<Packet>(m_packet_size);
+
+    }
+
+    void PulsingAttackBot::RttCallback(Time rtt)
+    {
+        NS_LOG_DEBUG("rtt value: " << rtt);
     }
 
     void PulsingAttackBot::RttCallback(Time rtt)

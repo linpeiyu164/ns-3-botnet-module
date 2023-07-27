@@ -4,6 +4,8 @@
 #include <ns3/type-name.h>
 #include <ns3/socket.h>
 #include <ns3/tcp-socket-factory.h>
+#include "ns3/internet-module.h"
+#include "ns3/ipv4-address-helper.h"
 
 namespace ns3
 {
@@ -78,6 +80,7 @@ namespace ns3
         m_recv_sockets.push_back(socket); // socket->GetPeerName() will get the remote address
     }
 
+
     /* Handle packet reads */
     void PulsingAttackCC::HandleRead(Ptr<Socket> socket)
     {
@@ -93,14 +96,14 @@ namespace ns3
         }
     }
 
-    void PulsingAttackCC::UpdateRtt(Ipv4Address ipv4, double rtt)
-    {
-        if(rtt > m_maxRtt)
-        {
-            m_maxRtt = rtt;
-        }
-        m_rtt[ipv4] = rtt;
-    }
+    // void PulsingAttackCC::UpdateRtt(Ipv4Address ipv4, double rtt)
+    // {
+    //     if(rtt > m_maxRtt)
+    //     {
+    //         m_maxRtt = rtt;
+    //     }
+    //     m_rtt[ipv4] = rtt;
+    // }
 
     void PulsingAttackCC::StopApplication()
     {
@@ -110,6 +113,34 @@ namespace ns3
             m_recv_sockets[i]->Close();
         }
         m_send_socket->Close();
+    }
+
+    uint32_t PulsingAttackCC::ContextToNodeId(std::string context)
+    {
+        std::string sub = context.substr(10);
+        uint32_t pos = sub.find("/ApplicationList");
+        return std::stoi(sub.substr(0, pos));
+    }
+
+    void PulsingAttackCC::CCRttTraceCallback(std::string context, Time rtt)
+    {
+        // NS_LOG_FUNCTION(context << rtt);
+        NS_LOG_INFO("Rtt trace: " << context << " with value of: " << rtt);
+        uint32_t nodeId = ContextToNodeId(context);
+        Ptr<Node> node = NodeList::GetNode(nodeId);
+        Ipv4Address ipv4addr = node->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
+        PulsingAttackCC::m_ccRttTable[ipv4addr] = rtt;
+        NS_LOG_INFO("IPV4 ADDRESS: " << ipv4addr);
+    }
+
+    void PulsingAttackCC::TargetRttTraceCallback(std::string context, Time rtt)
+    {
+        NS_LOG_INFO("Rtt trace: " << context << " with a value of: " << rtt);
+        uint32_t nodeId = ContextToNodeId(context);
+        Ptr<Node> node = NodeList::GetNode(nodeId);
+        Ipv4Address ipv4addr = node->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
+        PulsingAttackCC::m_targetRttTable[ipv4addr] = rtt;
+        NS_LOG_INFO("IPV4 ADDRESS: " << ipv4addr);
     }
 
     /*

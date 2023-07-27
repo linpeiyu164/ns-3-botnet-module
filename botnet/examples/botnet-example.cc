@@ -21,30 +21,10 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE("BotnetExample");
 
-std::unordered_map<Ipv4Address, Time, Ipv4AddressHash> rttTable;
-
 /*Callback for packet sink*/
 void targetRx(Ptr<const Packet> packet, const Address& address)
 {
     NS_LOG_INFO("Target received packet of " << packet->GetSize() << "bytes from " << address);
-}
-
-uint32_t ContextToNodeId(std::string context)
-{
-    std::string sub = context.substr(10);
-    uint32_t pos = sub.find("/ApplicationList");
-    return std::stoi(sub.substr(0, pos));
-}
-
-/*Rtt trace callback that updates the Rtt table*/
-void RttTraceCallback(std::string context, Time rtt)
-{
-    // NS_LOG_FUNCTION(context << rtt);
-    NS_LOG_INFO("Rtt trace: " << context << "with value of: " << rtt);
-    uint32_t nodeId = ContextToNodeId(context);
-    Ptr<Node> node = NodeList::GetNode(nodeId);
-    Ipv4Address ipv4addr = node->GetObject<Ipv4>()->GetAddress(0, 0).GetLocal();
-    rttTable[ipv4addr] = rtt;
 }
 
 int main(int argc, char* argv[])
@@ -55,6 +35,7 @@ int main(int argc, char* argv[])
     LogComponentEnable("PacketSink", LOG_ALL);
     LogComponentEnable("V4Ping", LOG_ALL);
     LogComponentEnable("Config", LOG_ALL);
+    LogComponentEnable("BriteTopologyHelper", LOG_ALL);
 
     std::string confFile = "src/brite/examples/conf_files/GUI_GEN3.conf";
 
@@ -88,6 +69,7 @@ int main(int argc, char* argv[])
     Ptr<Node> targetNode = targetNetwork.Get(0);
     stack.Install(targetNode);
 
+    p2p.SetChannelAttribute("Delay", TimeValue(MilliSeconds(2.0)));
     NetDeviceContainer p2pTargetDevices = p2p.Install(targetNetwork);
 
     address.SetBase("11.0.0.0", "255.255.255.0");
@@ -130,14 +112,16 @@ int main(int argc, char* argv[])
 
     /*Set attributes for pulsing applications*/
     bnh.SetAttributeBot(2, "StartTime", TimeValue(Seconds(8.0)));
-    bnh.SetAttributeBot(2, "RemoteAddress", Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0, 0)));
+    bnh.SetAttributeBot(2, "TargetAddress", Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0, 0)));
+    bnh.SetAttributeBot(2, "CCAddress", Ipv4AddressValue(bnh.GetBotMasterAddress(0)));
     bnh.SetAttributeCC(0, "StartTime", TimeValue(Seconds(9.0)));
 
     bnh.InstallApplications();
 
     /*Setup trace callback for Rtt*/
     Ptr<PulsingAttackCC> pulsingAttackCC = bnh.m_ccAppContainer.Get(0)->GetObject<PulsingAttackCC>();
-    Config::Connect("/NodeList/*/ApplicationList/*/$ns3::V4Ping/Rtt", MakeCallback(&RttTraceCallback));
+    Config::Connect("/NodeList/*/ApplicationList/0/$ns3::V4Ping/Rtt", MakeCallback(&PulsingAttackCC::CCRttTraceCallback));
+    Config::Connect("/NodeList/*/ApplicationList/1/$ns3::V4Ping/Rtt", MakeCallback(&PulsingAttackCC::TargetRttTraceCallback));
 
     Simulator::Run();
     Simulator::Destroy();
