@@ -20,6 +20,8 @@ namespace ns3
 
             void SendPacket();
             void ReceivePacket();
+
+            void RttCallback(Time rtt); // callback for pingv4
         private:
             void OpenConnection();
 
@@ -33,6 +35,8 @@ namespace ns3
 
             uint16_t m_packet_size;
             uint16_t m_attack_interval;
+
+            double m_rtt;
     };
 }
 

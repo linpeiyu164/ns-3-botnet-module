@@ -25,6 +25,8 @@ class Botnet{
         BotnetType m_type;
         std::string m_name;
         Ptr<Node> m_botMaster;
+        uint16_t m_botMasterAsId;
+        uint16_t m_botMasterNodeId;
 };
 
 }

@@ -37,6 +37,13 @@ namespace ns3
                         Ipv4AddressValue(),
                         MakeIpv4AddressAccessor(&PulsingAttackBot::m_remote_address),
                         MakeIpv4AddressChecker());
+                    // .AddAttribute(
+                    //     "CCAddress",
+                    //     "CC address",
+                    //     Ipv4AddressValue(),
+                    //     MakeIpv4AddressAccessor(&PulsingAttackBot::m_cc_address),
+                    //     MakeIpv4AddressChecker()
+                    // );
         return tid;
     }
 
@@ -135,5 +142,10 @@ namespace ns3
             }
             // schedule SendPacket based on received information
         }
+    }
+
+    void PulsingAttackBot::RttCallback(Time rtt)
+    {
+        NS_LOG_DEBUG("rtt value: " << rtt);
     }
 }

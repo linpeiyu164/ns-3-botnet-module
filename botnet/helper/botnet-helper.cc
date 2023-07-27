@@ -81,6 +81,8 @@ namespace ns3
 
             m_botnet->m_botMaster = m_botnet->m_botNodes[asId]->Get(nodeId);
             m_nodeMap[asId][nodeId] = 2;
+            m_botnet->m_botMasterAsId = asId;
+            m_botnet->m_botMasterNodeId = nodeId;
             m_botnet->m_size++;
         }
 
@@ -204,5 +206,10 @@ namespace ns3
         // appIndex: the index of the application in m_ccApps
         NS_LOG_FUNCTION(this << appIndex << name << &value);
         m_botApps[appIndex].Set(name, value);
+    }
+
+    Ipv4Address BotnetHelper::GetBotMasterAddress(uint16_t netDeviceIndex)
+    {
+        return Ipv4Address::ConvertFrom(m_botnet->m_botMaster->GetObject<Ipv4>()->GetAddress(0,0).GetLocal());
     }
 }

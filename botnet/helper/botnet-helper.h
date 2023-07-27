@@ -41,6 +41,9 @@ namespace ns3
             ApplicationContainer ApplicationInstallBot(std::vector<NodeContainer*>& c) const;
             ApplicationContainer ApplicationInstallCC(NodeContainer c) const;
 
+            ApplicationContainer m_ccAppContainer;
+            ApplicationContainer m_botAppContainer;
+
         private:
             Botnet *m_botnet;
             int m_numAs;
@@ -49,8 +52,6 @@ namespace ns3
             std::vector<std::vector<int>> m_nodeMap;
             std::vector<ObjectFactory> m_ccApps;
             std::vector<ObjectFactory> m_botApps;
-            ApplicationContainer m_ccAppContainer;
-            ApplicationContainer m_botAppContainer;
 
             /* initializes node map, tracks bot assignment in topology */
             void SetupNodeMap();
@@ -64,7 +65,7 @@ namespace ns3
         public:
             void SetAttributeCC(uint16_t appIndex, std::string name, const AttributeValue& value);
             void SetAttributeBot(uint16_t appIndex, std::string name, const AttributeValue& value);
-
+            Ipv4Address GetBotMasterAddress(uint16_t netDeviceIndex);
     };
 
 }

@@ -7,4 +7,5 @@ build_lib_example(
         ${libpoint-to-point}
         ${libapplications}
         ${libbotnet}
+        ${libinternet-apps}
 )
