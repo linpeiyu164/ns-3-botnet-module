@@ -37,9 +37,6 @@ namespace ns3
             /* Schedule send based on RTT*/
             void ScheduleSend();
 
-            /* Schedule send based on RTT*/
-            void ScheduleSend();
-
             /* send packet and schedule the next packet send */
             void SendPacket();
 

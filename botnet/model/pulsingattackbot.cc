@@ -149,14 +149,4 @@ namespace ns3
         Ptr<Packet> targetPacket = Create<Packet>(m_packet_size);
 
     }
-
-    void PulsingAttackBot::RttCallback(Time rtt)
-    {
-        NS_LOG_DEBUG("rtt value: " << rtt);
-    }
-
-    void PulsingAttackBot::RttCallback(Time rtt)
-    {
-        NS_LOG_DEBUG("rtt value: " << rtt);
-    }
 }
