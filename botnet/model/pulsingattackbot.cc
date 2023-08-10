@@ -1,5 +1,6 @@
 #include "pulsingattackbot.h"
 #include "ns3/tcp-socket-factory.h"
+#include "ns3/simulator.h"
 #include <ns3/uinteger.h>
 #include <ns3/type-name.h>
 
@@ -22,7 +23,7 @@ namespace ns3
                     .AddAttribute(
                         "PacketSize",
                         "Packet size of attacking packets",
-                        UintegerValue(100),
+                        UintegerValue(1024),
                         MakeUintegerAccessor(&PulsingAttackBot::m_packet_size),
                         MakeUintegerChecker<uint16_t>())
                     .AddAttribute(
@@ -42,7 +43,25 @@ namespace ns3
                         "CC address",
                         Ipv4AddressValue(),
                         MakeIpv4AddressAccessor(&PulsingAttackBot::m_cc_address),
-                        MakeIpv4AddressChecker()
+                        MakeIpv4AddressChecker())
+                    .AddAttribute(
+                        "Rounds",
+                        "Number of attack rounds",
+                        UintegerValue(3),
+                        MakeUintegerAccessor(&PulsingAttackBot::m_rounds),
+                        MakeUintegerChecker<uint16_t>())
+                    .AddAttribute(
+                        "AttackInterval",
+                        "AttackInterval",
+                        TimeValue(Seconds(10.0)),
+                        MakeTimeAccessor(&PulsingAttackBot::m_attack_interval),
+                        MakeTimeChecker())
+                    .AddAttribute(
+                        "CCPort",
+                        "CC Port",
+                        UintegerValue(8080),
+                        MakeUintegerAccessor(&PulsingAttackBot::m_cc_port),
+                        MakeUintegerChecker<uint16_t>()
                     );
         return tid;
     }
@@ -71,6 +90,7 @@ namespace ns3
         m_target_socket = Socket::CreateSocket(GetNode(), TcpSocketFactory::GetTypeId());
         m_cc_socket = Socket::CreateSocket(GetNode(), TcpSocketFactory::GetTypeId());
         OpenConnection(m_cc_socket, m_cc_address, m_cc_port);
+        NS_LOG_INFO("bot connected to CC");
         // OpenConnection(m_target_socket, m_target_address, m_target_port);
         Ptr<Packet> packet = Create<Packet>(m_packet_size);
         SendPacket(m_cc_socket, packet);
@@ -90,11 +110,11 @@ namespace ns3
         int ret = socket->Bind();
         if(ret < 0)
         {
-            NS_LOG_ERROR("Error: Failed to bind socket to target");
+            NS_LOG_ERROR("Error: Failed to bind socket");
         }
         else
         {
-            NS_LOG_INFO("Socket bound to target");
+            NS_LOG_INFO("Socket bound");
         }
 
         if(Ipv4Address::IsMatchingType(addr))
@@ -122,9 +142,13 @@ namespace ns3
     void PulsingAttackBot::SendPacket(Ptr<Socket> socket, Ptr<Packet> packet)
     {
         NS_LOG_FUNCTION(this);
-        // Ptr<Packet> packet = Create<Packet>(m_packet_size);
         socket->Send(packet);
-        // schedule the next send time
+        // schedule the next attack round
+        if(m_rounds > 0)
+        {
+            m_rounds--;
+            Simulator::Schedule(m_attack_interval, &PulsingAttackBot::SendPacket, this, socket, packet);
+        }
     }
 
     void PulsingAttackBot::ReceivePacketCC()
@@ -145,8 +169,15 @@ namespace ns3
             }
             // schedule SendPacket based on received information
         }
+        if(Ipv4Address::ConvertFrom(from) == m_cc_address)
+        {
+            Ptr<Packet> targetPacket = Create<Packet>(m_packet_size);
+            if(m_rounds > 0)
+            {
+                m_rounds--;
+                SendPacket(m_target_socket, packet);
+            }
 
-        Ptr<Packet> targetPacket = Create<Packet>(m_packet_size);
-
+        }
     }
 }

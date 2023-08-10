@@ -29,18 +29,18 @@ namespace ns3
                         UintegerValue(100),
                         MakeUintegerAccessor(&PulsingAttackCC::m_packet_size),
                         MakeUintegerChecker<uint16_t>())
-                    // .AddAttribute(
-                    //     "RemoteAddress",
-                    //     "Address of the node that will receive the packet",
-                    //     Ipv4AddressValue(),
-                    //     MakeIpv4AddressAccessor(&PulsingAttackCC::m_remote_address),
-                    //     MakeIpv4AddressChecker())
                     .AddAttribute(
                         "RemotePort",
                         "Port of the node that will receive the packet",
                         UintegerValue(8081),
                         MakeUintegerAccessor(&PulsingAttackCC::m_remote_port),
-                        MakeUintegerChecker<uint16_t>()
+                        MakeUintegerChecker<uint16_t>())
+                    .AddAttribute(
+                        "AttackTime",
+                        "Time between bot connection and attack",
+                        TimeValue(Seconds(20.0)),
+                        MakeTimeAccessor(&PulsingAttackCC::m_attack_time),
+                        MakeTimeChecker()
                     );
 
         return tid;
@@ -54,6 +54,7 @@ namespace ns3
 
     PulsingAttackCC::PulsingAttackCC()
     {
+        m_maxDelay = Seconds(0.0);
         NS_LOG_FUNCTION(this);
     }
 
@@ -69,7 +70,15 @@ namespace ns3
         socket->SetAcceptCallback(
             MakeNullCallback<bool, Ptr<Socket>, const Address &>(),
             MakeCallback(&PulsingAttackCC::HandleAccept, this));
-        socket->Listen();
+        if(socket->Bind(InetSocketAddress(Ipv4Address::GetAny(), m_recv_port)) == -1)
+        {
+            NS_LOG_ERROR("Socket bind failed");
+        }
+        else
+        {
+            socket->Listen();
+            Simulator::Schedule(Seconds(100), &PulsingAttackCC::ScheduleBots, this);
+        }
     }
 
     /* Handle connection requests */
@@ -77,9 +86,11 @@ namespace ns3
     {
         NS_LOG_FUNCTION(this << socket << address);
         socket->SetRecvCallback(MakeCallback(&PulsingAttackCC::HandleRead, this));
-        m_recv_sockets.push_back(socket); // socket->GetPeerName() will get the remote address
+        Ipv4Address ipv4 = InetSocketAddress::ConvertFrom(address).GetIpv4();
+        NS_LOG_DEBUG("Accepted Ipv4 address: " << ipv4);
+        m_recv_sockets[ipv4] = socket;
+        // socket->GetPeerName() will get the remote address
     }
-
 
     /* Handle packet reads */
     void PulsingAttackCC::HandleRead(Ptr<Socket> socket)
@@ -96,21 +107,12 @@ namespace ns3
         }
     }
 
-    // void PulsingAttackCC::UpdateRtt(Ipv4Address ipv4, double rtt)
-    // {
-    //     if(rtt > m_maxRtt)
-    //     {
-    //         m_maxRtt = rtt;
-    //     }
-    //     m_rtt[ipv4] = rtt;
-    // }
-
     void PulsingAttackCC::StopApplication()
     {
         NS_LOG_FUNCTION(this);
-        for(int i = 0; i < m_recv_sockets.size(); i++)
+        for(auto it = m_recv_sockets.begin(); it != m_recv_sockets.end(); it++)
         {
-            m_recv_sockets[i]->Close();
+            it->second->Close();
         }
         m_send_socket->Close();
     }
@@ -124,13 +126,41 @@ namespace ns3
 
     void PulsingAttackCC::CCRttTraceCallback(std::string context, Time rtt)
     {
-        // NS_LOG_FUNCTION(context << rtt);
         NS_LOG_INFO("Rtt trace: " << context << " with value of: " << rtt);
         uint32_t nodeId = ContextToNodeId(context);
         Ptr<Node> node = NodeList::GetNode(nodeId);
         Ipv4Address ipv4addr = node->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
         PulsingAttackCC::m_ccRttTable[ipv4addr] = rtt;
         NS_LOG_INFO("IPV4 ADDRESS: " << ipv4addr);
+    }
+
+    void PulsingAttackCC::ScheduleBots()
+    {
+        NS_LOG_FUNCTION(this);
+        for(auto it = PulsingAttackCC::m_ccRttTable.begin(); it != PulsingAttackCC::m_ccRttTable.end(); it++)
+        {
+            Ipv4Address ipv4 = it->first;
+            it->second = (it->second + m_targetRttTable[ipv4])/2;
+            NS_LOG_DEBUG("Delay: " << it->second);
+            if(it->second > m_maxDelay)
+            {
+                m_maxDelay = it->second;
+            }
+        }
+
+        for(auto it = PulsingAttackCC::m_ccRttTable.begin(); it != PulsingAttackCC::m_ccRttTable.end(); it++)
+        {
+            if(it == NULL)
+            {
+                NS_LOG_ERROR("Null iterator");
+            }
+            else
+            {
+                Time commandTime = m_attack_time + m_maxDelay - it -> second;
+                Simulator::Schedule(commandTime, &PulsingAttackCC::SendCommand, this, it->first);
+            }
+
+        }
     }
 
     void PulsingAttackCC::TargetRttTraceCallback(std::string context, Time rtt)
@@ -143,60 +173,13 @@ namespace ns3
         NS_LOG_INFO("IPV4 ADDRESS: " << ipv4addr);
     }
 
-    /*
-    void PulsingAttackCC::OpenConnection()
-    {
-        NS_LOG_FUNCTION(this);
-
-        // bind socket
-        int ret = m_send_socket->Bind();
-        if(ret < 0)
-        {
-            NS_LOG_ERROR("Error: Binding failed");
-        }
-        else
-        {
-            NS_LOG_INFO("Socket bound");
-        }
-
-        // connect to remote address
-        if(Ipv4Address::IsMatchingType(m_remote_address))
-        {
-            InetSocketAddress inetSocket = InetSocketAddress(m_remote_address, m_remote_port);
-            Address remoteAddress(inetSocket);
-
-            ret = m_send_socket->Connect(remoteAddress);
-            if(ret < 0)
-            {
-                NS_LOG_ERROR("Error: Connection failed");
-            }
-            else
-            {
-                NS_LOG_INFO("CC Connected");
-            }
-        }
-        else
-        {
-            NS_LOG_ERROR("Error: Address incompatible with Ipv4");
-        }
-    }
-    */
-
-    void PulsingAttackCC::SendPacket()
+    void PulsingAttackCC::SendCommand(Ipv4Address ipv4)
     {
         NS_LOG_FUNCTION(this);
 
         Ptr<Packet> packet = Create<Packet>(m_packet_size);
-        m_send_socket->Send(packet);
-
-        // calculate next_send_time based on received RTT time from bots
-        Time send_interval = Seconds(2.0);
-        Simulator::Schedule(send_interval, &PulsingAttackCC::SendPacket, this);
-    }
-
-    void PulsingAttackCC::ScheduleSend()
-    {
-        NS_LOG_FUNCTION(this);
+        Ptr<Socket> socket = m_recv_sockets[ipv4];
+        socket->Send(packet);
     }
 
 }

@@ -30,16 +30,17 @@ namespace ns3
             uint16_t m_target_port;
             Ptr<Socket> m_target_socket;
 
-
             Ptr<Socket> m_recv_socket;
             uint16_t m_recv_port;
 
             uint16_t m_packet_size;
-            uint16_t m_attack_interval;
+            Time m_attack_interval;
 
             Ipv4Address m_cc_address;
             uint16_t m_cc_port;
             Ptr<Socket> m_cc_socket;
+
+            uint16_t m_rounds;
 
             double m_rtt;
     };

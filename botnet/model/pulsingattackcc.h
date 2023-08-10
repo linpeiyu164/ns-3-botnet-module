@@ -4,6 +4,7 @@
 #include "ns3/socket.h"
 #include <unordered_map>
 
+
 namespace ns3
 {
     class PulsingAttackCC: public Application
@@ -24,21 +25,12 @@ namespace ns3
 
             inline static std::unordered_map<Ipv4Address, Time, Ipv4AddressHash> m_ccRttTable;
             inline static std::unordered_map<Ipv4Address, Time, Ipv4AddressHash> m_targetRttTable;
+            std::unordered_map<Ipv4Address, Ptr<Socket>, Ipv4AddressHash> m_recv_sockets;
 
         private:
 
-            // void InitRtt(uint16_t numAs, uint16_t numNodePerAs);
-
-            // void UpdateRtt(uint16_t asId, uint16_t NodeId, double rtt);
-
-            /* open the connection to remote address */
-            // void OpenConnection();
-
             /* Schedule send based on RTT*/
             void ScheduleSend();
-
-            /* send packet and schedule the next packet send */
-            void SendPacket();
 
             /* Handle packet reads */
             void HandleRead(Ptr<Socket> socket);
@@ -48,6 +40,11 @@ namespace ns3
 
             /* Handle connection requests */
             void HandleAccept(Ptr<Socket> socket, const Address & address);
+
+            /*Schedule bots based on RTT*/
+            void ScheduleBots();
+
+            void SendCommand(Ipv4Address ipv4);
 
             // Ptr<Socket> m_recv_socket;
             uint16_t m_recv_port;
@@ -64,10 +61,9 @@ namespace ns3
             // std::vector<std::vector<double>> m_rtt;
             // std::unordered_map<Ipv4Address, double, Ipv4AddressHash> m_rtt;
 
+            Time m_maxDelay;
 
-            double m_maxRtt;
-
-            std::vector<Ptr<Socket>> m_recv_sockets;
+            Time m_attack_time;
     };
 }
 #endif /* ATTACK_H */

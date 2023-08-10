@@ -180,14 +180,6 @@ namespace ns3
         return apps;
     }
 
-    // void BotnetHelper::SetupAttack(std::string ccTypeId, std::string botTypeId)
-    // {
-    //     NS_LOG_FUNCTION(this << ccTypeId << botTypeId);
-    //     // Application types defined
-    //     AddApplication(BotType::CENTRAL_CONTROLLER, ccTypeId);
-    //     AddApplication(BotType::BOT, botTypeId);
-    // }
-
     void BotnetHelper::InstallApplications()
     {
         m_botAppContainer = ApplicationInstallBot(m_botnet->m_botNodes);

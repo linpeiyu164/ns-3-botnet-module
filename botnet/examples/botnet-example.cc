@@ -111,10 +111,10 @@ int main(int argc, char* argv[])
     bnh.SetAttributeBot(1, "Remote", Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0,0)));
 
     /*Set attributes for pulsing applications*/
-    bnh.SetAttributeBot(2, "StartTime", TimeValue(Seconds(8.0)));
+    bnh.SetAttributeBot(2, "StartTime", TimeValue(Seconds(20.0)));
     bnh.SetAttributeBot(2, "TargetAddress", Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0, 0)));
     bnh.SetAttributeBot(2, "CCAddress", Ipv4AddressValue(bnh.GetBotMasterAddress(0)));
-    bnh.SetAttributeCC(0, "StartTime", TimeValue(Seconds(9.0)));
+    bnh.SetAttributeCC(0, "StartTime", TimeValue(Seconds(21.0)));
 
     bnh.InstallApplications();
 
