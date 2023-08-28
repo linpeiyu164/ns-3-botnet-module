@@ -18,13 +18,18 @@ namespace ns3
             void StartApplication();
             void StopApplication();
 
-            void SendPacket(Ptr<Socket> socket, Ptr<Packet> packet);
+            void SendPacketCC(Ptr<Socket> socket);
 
-            void ReceivePacketCC();
+            void SendPacketTarget();
+
+            void ReceivePacketCC(Ptr<Socket> socket);
 
             void RttCallback(Time rtt); // callback for pingv4
+
         private:
             void OpenConnection(Ptr<Socket> socket, Ipv4Address addr, uint16_t port);
+
+            void HandleAccept(Ptr<Socket> socket, const Address & address);
 
             Ipv4Address m_target_address;
             uint16_t m_target_port;

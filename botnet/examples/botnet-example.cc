@@ -24,7 +24,7 @@ NS_LOG_COMPONENT_DEFINE("BotnetExample");
 /*Callback for packet sink*/
 void targetRx(Ptr<const Packet> packet, const Address& address)
 {
-    NS_LOG_INFO("Target received packet of " << packet->GetSize() << "bytes from " << address);
+    NS_LOG_INFO("Target received packet of " << packet->GetSize() << " bytes from " << address);
 }
 
 int main(int argc, char* argv[])
@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
     InternetStackHelper stack;
 
     Ipv4AddressHelper address;
-    address.SetBase("10.0.0.0", "255.255.255.0");
+    address.SetBase("192.168.1.0", "255.255.255.0");
 
     bth.BuildBriteTopology(stack);
     bth.AssignIpv4Addresses(address);
@@ -72,7 +72,6 @@ int main(int argc, char* argv[])
     p2p.SetChannelAttribute("Delay", TimeValue(MilliSeconds(2.0)));
     NetDeviceContainer p2pTargetDevices = p2p.Install(targetNetwork);
 
-    address.SetBase("11.0.0.0", "255.255.255.0");
     Ipv4InterfaceContainer targetNetworkInterfaces;
     targetNetworkInterfaces = address.Assign(p2pTargetDevices);
 
@@ -112,7 +111,7 @@ int main(int argc, char* argv[])
 
     /*Set attributes for pulsing applications*/
     bnh.SetAttributeBot(2, "StartTime", TimeValue(Seconds(20.0)));
-    bnh.SetAttributeBot(2, "TargetAddress", Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0, 0)));
+    bnh.SetAttributeBot(2, "TargetAddress", Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0,0)));
     bnh.SetAttributeBot(2, "CCAddress", Ipv4AddressValue(bnh.GetBotMasterAddress(0)));
     bnh.SetAttributeCC(0, "StartTime", TimeValue(Seconds(21.0)));
 

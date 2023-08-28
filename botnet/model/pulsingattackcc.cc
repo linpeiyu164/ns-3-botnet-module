@@ -88,8 +88,7 @@ namespace ns3
         socket->SetRecvCallback(MakeCallback(&PulsingAttackCC::HandleRead, this));
         Ipv4Address ipv4 = InetSocketAddress::ConvertFrom(address).GetIpv4();
         NS_LOG_DEBUG("Accepted Ipv4 address: " << ipv4);
-        m_recv_sockets[ipv4] = socket;
-        // socket->GetPeerName() will get the remote address
+        // m_recv_sockets[ipv4] = socket;
     }
 
     /* Handle packet reads */
@@ -99,7 +98,7 @@ namespace ns3
         Ptr<Packet> packet;
         while((packet = socket->Recv()))
         {
-            NS_LOG_DEBUG("packet received");
+            NS_LOG_DEBUG("packet received from bot to cc");
             // get the rtt packet tag
             // Address addr = socket->GetPeerName();
             // UpdateRtt(addr, rtt);
@@ -110,11 +109,11 @@ namespace ns3
     void PulsingAttackCC::StopApplication()
     {
         NS_LOG_FUNCTION(this);
-        for(auto it = m_recv_sockets.begin(); it != m_recv_sockets.end(); it++)
+        for(auto it = m_socketMap.begin(); it != m_socketMap.end(); it++)
         {
             it->second->Close();
         }
-        m_send_socket->Close();
+        // m_send_socket->Close();
     }
 
     uint32_t PulsingAttackCC::ContextToNodeId(std::string context)
@@ -129,9 +128,9 @@ namespace ns3
         NS_LOG_INFO("Rtt trace: " << context << " with value of: " << rtt);
         uint32_t nodeId = ContextToNodeId(context);
         Ptr<Node> node = NodeList::GetNode(nodeId);
-        Ipv4Address ipv4addr = node->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
-        PulsingAttackCC::m_ccRttTable[ipv4addr] = rtt;
-        NS_LOG_INFO("IPV4 ADDRESS: " << ipv4addr);
+        // Ipv4Address ipv4addr = node->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
+        PulsingAttackCC::m_ccRttTable[nodeId] = rtt;
+        // NS_LOG_INFO("CC Ipv4 Address: " << ipv4addr);
     }
 
     void PulsingAttackCC::ScheduleBots()
@@ -139,8 +138,8 @@ namespace ns3
         NS_LOG_FUNCTION(this);
         for(auto it = PulsingAttackCC::m_ccRttTable.begin(); it != PulsingAttackCC::m_ccRttTable.end(); it++)
         {
-            Ipv4Address ipv4 = it->first;
-            it->second = (it->second + m_targetRttTable[ipv4])/2;
+            uint32_t nodeId = it->first;
+            it->second = (it->second + m_targetRttTable[nodeId])/2;
             NS_LOG_DEBUG("Delay: " << it->second);
             if(it->second > m_maxDelay)
             {
@@ -150,16 +149,33 @@ namespace ns3
 
         for(auto it = PulsingAttackCC::m_ccRttTable.begin(); it != PulsingAttackCC::m_ccRttTable.end(); it++)
         {
-            if(it == NULL)
+            Time commandTime = m_attack_time + m_maxDelay - it->second;
+            uint32_t nodeId = it->first;
+
+            // create, bind and connect to bot
+            m_socketMap[nodeId] = Socket::CreateSocket(GetNode(), TcpSocketFactory::GetTypeId());
+            int ret = m_socketMap[nodeId]->Bind();
+            if(ret < 0)
             {
-                NS_LOG_ERROR("Null iterator");
+                NS_LOG_DEBUG("Binding failed");
             }
             else
             {
-                Time commandTime = m_attack_time + m_maxDelay - it -> second;
-                Simulator::Schedule(commandTime, &PulsingAttackCC::SendCommand, this, it->first);
+                Ptr<Node> node = NodeList::GetNode(nodeId);
+                Ipv4Address ipv4 = node->GetObject<Ipv4>()->GetAddress(1,0).GetLocal();
+                NS_LOG_DEBUG("Connecting to the following address: " << ipv4);
+                InetSocketAddress addr = InetSocketAddress(ipv4, 8000);
+                ret = m_socketMap[nodeId]->Connect(addr);
+                if(ret < 0)
+                {
+                    NS_LOG_DEBUG("socket failed to connect from cc to bot");
+                }
+                else
+                {
+                    NS_LOG_DEBUG("socket succeeded in connecting from cc to bot");
+                }
             }
-
+            Simulator::Schedule(commandTime, &PulsingAttackCC::SendCommand, this, it->first);
         }
     }
 
@@ -168,18 +184,27 @@ namespace ns3
         NS_LOG_INFO("Rtt trace: " << context << " with a value of: " << rtt);
         uint32_t nodeId = ContextToNodeId(context);
         Ptr<Node> node = NodeList::GetNode(nodeId);
-        Ipv4Address ipv4addr = node->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
-        PulsingAttackCC::m_targetRttTable[ipv4addr] = rtt;
-        NS_LOG_INFO("IPV4 ADDRESS: " << ipv4addr);
+        // Ipv4Address ipv4addr = node->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
+        PulsingAttackCC::m_targetRttTable[nodeId] = rtt;
+        // NS_LOG_INFO("Target Ipv4 Address: " << ipv4addr);
     }
 
-    void PulsingAttackCC::SendCommand(Ipv4Address ipv4)
+    void PulsingAttackCC::SendCommand(uint32_t nodeId)
     {
         NS_LOG_FUNCTION(this);
-
+        // Ipv4Address ipv4;
+        // NS_LOG_DEBUG("Finding corresponding socket to: " << ipv4);
         Ptr<Packet> packet = Create<Packet>(m_packet_size);
-        Ptr<Socket> socket = m_recv_sockets[ipv4];
-        socket->Send(packet);
+        Ptr<Socket> socket = m_socketMap[nodeId];
+        if(!socket)
+        {
+            NS_LOG_ERROR("Null socket");
+        }
+        else
+        {
+            NS_LOG_DEBUG("Sending packet out");
+            socket->Send(packet);
+        }
     }
 
 }

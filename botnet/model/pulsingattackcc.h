@@ -23,9 +23,10 @@ namespace ns3
             static void TargetRttTraceCallback(std::string context, Time rtt);
             static uint32_t ContextToNodeId(std::string context);
 
-            inline static std::unordered_map<Ipv4Address, Time, Ipv4AddressHash> m_ccRttTable;
-            inline static std::unordered_map<Ipv4Address, Time, Ipv4AddressHash> m_targetRttTable;
-            std::unordered_map<Ipv4Address, Ptr<Socket>, Ipv4AddressHash> m_recv_sockets;
+            inline static std::unordered_map<uint32_t, Time> m_ccRttTable;
+            inline static std::unordered_map<uint32_t, Time> m_targetRttTable;
+            // std::unordered_map<Ipv4Address, Ptr<Socket>, Ipv4AddressHash> m_recv_sockets;
+            std::unordered_map<uint32_t, Ptr<Socket>> m_socketMap;
 
         private:
 
@@ -44,7 +45,7 @@ namespace ns3
             /*Schedule bots based on RTT*/
             void ScheduleBots();
 
-            void SendCommand(Ipv4Address ipv4);
+            void SendCommand(uint32_t nodeId);
 
             // Ptr<Socket> m_recv_socket;
             uint16_t m_recv_port;
