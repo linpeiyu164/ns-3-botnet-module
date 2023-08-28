@@ -74,6 +74,7 @@ int main(int argc, char* argv[])
 
     Ipv4InterfaceContainer targetNetworkInterfaces;
     targetNetworkInterfaces = address.Assign(p2pTargetDevices);
+    NS_LOG_DEBUG("Number of devices on target node: " << targetNode->GetNDevices());
 
     Ipv4GlobalRoutingHelper::PopulateRoutingTables();
     NS_LOG_INFO("Done populating routing tables");
@@ -121,6 +122,8 @@ int main(int argc, char* argv[])
     Ptr<PulsingAttackCC> pulsingAttackCC = bnh.m_ccAppContainer.Get(0)->GetObject<PulsingAttackCC>();
     Config::Connect("/NodeList/*/ApplicationList/0/$ns3::V4Ping/Rtt", MakeCallback(&PulsingAttackCC::CCRttTraceCallback));
     Config::Connect("/NodeList/*/ApplicationList/1/$ns3::V4Ping/Rtt", MakeCallback(&PulsingAttackCC::TargetRttTraceCallback));
+
+    p2p.EnablePcap("botnet-example", targetNetwork.Get(0)->GetId(), 1);
 
     Simulator::Run();
     Simulator::Destroy();
