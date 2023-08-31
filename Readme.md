@@ -8,3 +8,8 @@ This module is dependent on [ns-3.37](https://www.nsnam.org/releases/ns-3-37/) a
 
 ## Install
 Place the repository in the **contrib** directory as shown in this [example](https://www.nsnam.org/docs/manual/html/new-modules.html).
+
+## Run Example
+In ns3-3.7 directory:
+./ns3 configure --with-brite=<BRITE_path> --enable-examples --enable-tests
+
