@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
     LogComponentEnable("Config", LOG_ALL);
     LogComponentEnable("BriteTopologyHelper", LOG_ALL);
 
-    std::string confFile = "src/brite/examples/conf_files/GUI_GEN3.conf";
+    std::string confFile = "contrib/botnet/examples/conf_files/GUI_GEN3.conf";
 
     CommandLine cmd(__FILE__);
     cmd.AddValue("confFile", "BRITE conf file", confFile);
@@ -114,6 +114,7 @@ int main(int argc, char* argv[])
     bnh.SetAttributeBot(2, "StartTime", TimeValue(Seconds(20.0)));
     bnh.SetAttributeBot(2, "TargetAddress", Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0,0)));
     bnh.SetAttributeBot(2, "CCAddress", Ipv4AddressValue(bnh.GetBotMasterAddress(0)));
+
     bnh.SetAttributeCC(0, "StartTime", TimeValue(Seconds(21.0)));
 
     bnh.InstallApplications();
@@ -122,7 +123,6 @@ int main(int argc, char* argv[])
     Ptr<PulsingAttackCC> pulsingAttackCC = bnh.m_ccAppContainer.Get(0)->GetObject<PulsingAttackCC>();
     Config::Connect("/NodeList/*/ApplicationList/0/$ns3::V4Ping/Rtt", MakeCallback(&PulsingAttackCC::CCRttTraceCallback));
     Config::Connect("/NodeList/*/ApplicationList/1/$ns3::V4Ping/Rtt", MakeCallback(&PulsingAttackCC::TargetRttTraceCallback));
-
     p2p.EnablePcap("botnet-example", targetNetwork.Get(0)->GetId(), 1);
 
     Simulator::Run();

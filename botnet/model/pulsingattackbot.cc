@@ -54,7 +54,7 @@ namespace ns3
                     .AddAttribute(
                         "AttackInterval",
                         "AttackInterval",
-                        TimeValue(Seconds(10.0)),
+                        TimeValue(Seconds(100.0)),
                         MakeTimeAccessor(&PulsingAttackBot::m_attack_interval),
                         MakeTimeChecker())
                     .AddAttribute(
