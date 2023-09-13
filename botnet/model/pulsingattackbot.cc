@@ -24,7 +24,7 @@ namespace ns3
                     .AddAttribute(
                         "PacketSize",
                         "Packet size of attacking packets",
-                        UintegerValue(1024),
+                        UintegerValue(100),
                         MakeUintegerAccessor(&PulsingAttackBot::m_packet_size),
                         MakeUintegerChecker<uint16_t>())
                     .AddAttribute(
