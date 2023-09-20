@@ -1,33 +1,35 @@
+#include "ns3/applications-module.h"
 #include "ns3/botnet-helper.h"
-#include "ns3/core-module.h"
 #include "ns3/brite-topology-helper.h"
+#include "ns3/core-module.h"
+#include "ns3/internet-apps-module.h"
+#include "ns3/internet-module.h"
+#include "ns3/ipv4-address-helper.h"
 #include "ns3/network-module.h"
+#include "ns3/packet-sink-helper.h"
 #include "ns3/point-to-point-module.h"
 #include "ns3/pulsingattack-helper.h"
-#include "ns3/packet-sink-helper.h"
-#include "ns3/ipv4-address-helper.h"
-#include "ns3/applications-module.h"
-#include "ns3/internet-module.h"
-#include "ns3/internet-apps-module.h"
 #include "ns3/pulsingattackcc.h"
 
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE("BotnetExample");
 
 /*Callback for packet sink*/
-void targetRx(Ptr<const Packet> packet, const Address& address)
+void
+targetRx(Ptr<const Packet> packet, const Address& address)
 {
     NS_LOG_INFO("Target received packet of " << packet->GetSize() << " bytes from " << address);
 }
 
-int main(int argc, char* argv[])
+int
+main(int argc, char* argv[])
 {
     LogComponentEnable("BotnetExample", LOG_ALL);
     LogComponentEnable("PulsingAttackCC", LOG_ALL);
@@ -64,7 +66,7 @@ int main(int argc, char* argv[])
     NodeContainer targetNetwork;
     targetNetwork.Create(1);
     int numLeaf = bth.GetNLeafNodesForAs(0);
-    targetNetwork.Add(bth.GetLeafNodeForAs(0, numLeaf-1));
+    targetNetwork.Add(bth.GetLeafNodeForAs(0, numLeaf - 1));
 
     Ptr<Node> targetNode = targetNetwork.Get(0);
     stack.Install(targetNode);
@@ -80,7 +82,8 @@ int main(int argc, char* argv[])
     NS_LOG_INFO("Done populating routing tables");
 
     uint16_t sinkPort = 8081;
-    PacketSinkHelper packetSinkHelper("ns3::TcpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), sinkPort));
+    PacketSinkHelper packetSinkHelper("ns3::TcpSocketFactory",
+                                      InetSocketAddress(Ipv4Address::GetAny(), sinkPort));
     ApplicationContainer sinkApps = packetSinkHelper.Install(targetNode);
     sinkApps.Start(Seconds(0.));
 
@@ -98,7 +101,8 @@ int main(int argc, char* argv[])
     /*Setup apps for bots*/
     bnh.AddApplication(BotType::BOT, "ns3::V4Ping"); // for pinging botmaster
     bnh.AddApplication(BotType::BOT, "ns3::V4Ping"); // for pinging target
-    bnh.AddApplication(BotType::BOT, "ns3::PulsingAttackBot"); // for communicating with cc and attacking target
+    bnh.AddApplication(BotType::BOT,
+                       "ns3::PulsingAttackBot"); // for communicating with cc and attacking target
 
     /*Set attributes for 1st v4ping*/
     bnh.SetAttributeBot(0, "StartTime", TimeValue(Seconds(0.0)));
@@ -108,11 +112,13 @@ int main(int argc, char* argv[])
     /*Set attributes for 2nd v4ping*/
     bnh.SetAttributeBot(1, "StartTime", TimeValue(Seconds(4.0)));
     bnh.SetAttributeBot(1, "StopTime", TimeValue(Seconds(7.0)));
-    bnh.SetAttributeBot(1, "Remote", Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0,0)));
+    bnh.SetAttributeBot(1, "Remote", Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0, 0)));
 
     /*Set attributes for pulsing applications*/
     bnh.SetAttributeBot(2, "StartTime", TimeValue(Seconds(20.0)));
-    bnh.SetAttributeBot(2, "TargetAddress", Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0,0)));
+    bnh.SetAttributeBot(2,
+                        "TargetAddress",
+                        Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0, 0)));
     bnh.SetAttributeBot(2, "CCAddress", Ipv4AddressValue(bnh.GetBotMasterAddress(0)));
 
     bnh.SetAttributeCC(0, "StartTime", TimeValue(Seconds(21.0)));
@@ -120,9 +126,12 @@ int main(int argc, char* argv[])
     bnh.InstallApplications();
 
     /*Setup trace callback for Rtt*/
-    Ptr<PulsingAttackCC> pulsingAttackCC = bnh.m_ccAppContainer.Get(0)->GetObject<PulsingAttackCC>();
-    Config::Connect("/NodeList/*/ApplicationList/0/$ns3::V4Ping/Rtt", MakeCallback(&PulsingAttackCC::CCRttTraceCallback));
-    Config::Connect("/NodeList/*/ApplicationList/1/$ns3::V4Ping/Rtt", MakeCallback(&PulsingAttackCC::TargetRttTraceCallback));
+    Ptr<PulsingAttackCC> pulsingAttackCC =
+        bnh.m_ccAppContainer.Get(0)->GetObject<PulsingAttackCC>();
+    Config::Connect("/NodeList/*/ApplicationList/0/$ns3::V4Ping/Rtt",
+                    MakeCallback(&PulsingAttackCC::CCRttTraceCallback));
+    Config::Connect("/NodeList/*/ApplicationList/1/$ns3::V4Ping/Rtt",
+                    MakeCallback(&PulsingAttackCC::TargetRttTraceCallback));
     p2p.EnablePcap("botnet-example", targetNetwork.Get(0)->GetId(), 1);
 
     Simulator::Run();

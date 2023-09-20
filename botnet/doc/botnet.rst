@@ -1,9 +1,6 @@
 Example Module Documentation
 ----------------------------
 
-.. include:: replace.txt
-.. highlight:: cpp
-
 .. heading hierarchy:
    ------------- Chapter
    ************* Section (#.#)
@@ -38,6 +35,18 @@ Scope and Limitations
 
 What can the model do?  What can it not do?  Please use this section to
 describe the scope and limitations of the model.
+
+Future work
+===========
+
+Long term goal of this project is to be able to simulate realistic DDoS scenarios and generate DDoS datasets for research purposes.
+Currently, this module supports the generation of pulsing DDoS attacks.
+Some possible future directions are:
+
+1. Add benign background traffic. Current research usually add self-generated data and real-world benign traffic traces to form a new dataset.
+2. Imitate existing botnet family behavior. Some botnet families follow specific behaviors, ex. use specific protocols. This could make the dataset more realistic.
+3. Add additional flow monitoring information. Allowing users to extract flow information for further analysis.
+4. Add custom packet tags specifically designed for DDoS detection, ex. malicious packets/benign packets
 
 References
 ==========

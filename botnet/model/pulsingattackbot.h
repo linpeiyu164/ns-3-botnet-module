@@ -6,49 +6,49 @@
 
 namespace ns3
 {
-    class PulsingAttackBot: public Application
-    {
-        public:
-            PulsingAttackBot();
-            virtual ~PulsingAttackBot();
+class PulsingAttackBot : public Application
+{
+  public:
+    PulsingAttackBot();
+    virtual ~PulsingAttackBot();
 
-            static TypeId GetTypeId();
-            virtual TypeId GetInstanceTypeId() const;
+    static TypeId GetTypeId();
+    virtual TypeId GetInstanceTypeId() const;
 
-            void StartApplication();
-            void StopApplication();
+    void StartApplication();
+    void StopApplication();
 
-            void SendPacketCC(Ptr<Socket> socket);
+    void SendPacketCC(Ptr<Socket> socket);
 
-            void SendPacketTarget();
+    void SendPacketTarget();
 
-            void ReceivePacketCC(Ptr<Socket> socket);
+    void ReceivePacketCC(Ptr<Socket> socket);
 
-            void RttCallback(Time rtt); // callback for pingv4
+    void RttCallback(Time rtt); // callback for pingv4
 
-        private:
-            void OpenConnection(Ptr<Socket> socket, Ipv4Address addr, uint16_t port);
+  private:
+    void OpenConnection(Ptr<Socket> socket, Ipv4Address addr, uint16_t port);
 
-            void HandleAccept(Ptr<Socket> socket, const Address & address);
+    void HandleAccept(Ptr<Socket> socket, const Address& address);
 
-            Ipv4Address m_target_address;
-            uint16_t m_target_port;
-            Ptr<Socket> m_target_socket;
+    Ipv4Address m_target_address;
+    uint16_t m_target_port;
+    Ptr<Socket> m_target_socket;
 
-            Ptr<Socket> m_recv_socket;
-            uint16_t m_recv_port;
+    Ptr<Socket> m_recv_socket;
+    uint16_t m_recv_port;
 
-            uint16_t m_packet_size;
-            Time m_attack_interval;
+    uint16_t m_packet_size;
+    Time m_attack_interval;
 
-            Ipv4Address m_cc_address;
-            uint16_t m_cc_port;
-            Ptr<Socket> m_cc_socket;
+    Ipv4Address m_cc_address;
+    uint16_t m_cc_port;
+    Ptr<Socket> m_cc_socket;
 
-            uint16_t m_rounds;
+    uint16_t m_rounds;
 
-            double m_rtt;
-    };
-}
+    double m_rtt;
+};
+} // namespace ns3
 
 #endif

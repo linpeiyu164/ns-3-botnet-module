@@ -2,69 +2,68 @@
 #define PULSING_ATTACK_CC_H
 #include "ns3/application.h"
 #include "ns3/socket.h"
-#include <unordered_map>
 
+#include <unordered_map>
 
 namespace ns3
 {
-    class PulsingAttackCC: public Application
-    {
-        public:
-            PulsingAttackCC();
-            virtual ~PulsingAttackCC();
+class PulsingAttackCC : public Application
+{
+  public:
+    PulsingAttackCC();
+    virtual ~PulsingAttackCC();
 
-            static TypeId GetTypeId();
-            virtual TypeId GetInstanceTypeId() const;
+    static TypeId GetTypeId();
+    virtual TypeId GetInstanceTypeId() const;
 
-            void StartApplication(); // inherited once when app starts
-            void StopApplication();
+    void StartApplication(); // inherited once when app starts
+    void StopApplication();
 
-            static void CCRttTraceCallback(std::string context, Time rtt);
-            static void TargetRttTraceCallback(std::string context, Time rtt);
-            static uint32_t ContextToNodeId(std::string context);
+    static void CCRttTraceCallback(std::string context, Time rtt);
+    static void TargetRttTraceCallback(std::string context, Time rtt);
+    static uint32_t ContextToNodeId(std::string context);
 
-            inline static std::unordered_map<uint32_t, Time> m_ccRttTable;
-            inline static std::unordered_map<uint32_t, Time> m_targetRttTable;
-            // std::unordered_map<Ipv4Address, Ptr<Socket>, Ipv4AddressHash> m_recv_sockets;
-            std::unordered_map<uint32_t, Ptr<Socket>> m_socketMap;
+    inline static std::unordered_map<uint32_t, Time> m_ccRttTable;
+    inline static std::unordered_map<uint32_t, Time> m_targetRttTable;
+    // std::unordered_map<Ipv4Address, Ptr<Socket>, Ipv4AddressHash> m_recv_sockets;
+    std::unordered_map<uint32_t, Ptr<Socket>> m_socketMap;
 
-        private:
+  private:
+    /* Schedule send based on RTT*/
+    void ScheduleSend();
 
-            /* Schedule send based on RTT*/
-            void ScheduleSend();
+    /* Handle packet reads */
+    void HandleRead(Ptr<Socket> socket);
 
-            /* Handle packet reads */
-            void HandleRead(Ptr<Socket> socket);
+    /* Update rtt table*/
+    void UpdateRtt(Ipv4Address ipv4, double rtt);
 
-            /* Update rtt table*/
-            void UpdateRtt(Ipv4Address ipv4, double rtt);
+    /* Handle connection requests */
+    void HandleAccept(Ptr<Socket> socket, const Address& address);
 
-            /* Handle connection requests */
-            void HandleAccept(Ptr<Socket> socket, const Address & address);
+    /*Schedule bots based on RTT*/
+    void ScheduleBots();
 
-            /*Schedule bots based on RTT*/
-            void ScheduleBots();
+    void SendCommand(uint32_t nodeId);
 
-            void SendCommand(uint32_t nodeId);
+    // Ptr<Socket> m_recv_socket;
+    uint16_t m_recv_port;
 
-            // Ptr<Socket> m_recv_socket;
-            uint16_t m_recv_port;
+    Ptr<Socket> m_send_socket;
 
-            Ptr<Socket> m_send_socket;
+    // Ipv4Address m_remote_address;
+    uint16_t m_remote_port;
 
-            // Ipv4Address m_remote_address;
-            uint16_t m_remote_port;
+    uint32_t m_packet_size;
 
-            uint32_t m_packet_size;
+    // m_rtt[botUid][rtt_total]
+    // rtt_total = bot_target_rtt + master_bot_rtt
+    // std::vector<std::vector<double>> m_rtt;
+    // std::unordered_map<Ipv4Address, double, Ipv4AddressHash> m_rtt;
 
-            // m_rtt[botUid][rtt_total]
-            // rtt_total = bot_target_rtt + master_bot_rtt
-            // std::vector<std::vector<double>> m_rtt;
-            // std::unordered_map<Ipv4Address, double, Ipv4AddressHash> m_rtt;
+    Time m_maxDelay;
 
-            Time m_maxDelay;
-
-            Time m_attack_time;
-    };
-}
+    Time m_attack_time;
+};
+} // namespace ns3
 #endif /* ATTACK_H */
