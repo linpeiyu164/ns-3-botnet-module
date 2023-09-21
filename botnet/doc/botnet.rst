@@ -1,43 +1,27 @@
-Example Module Documentation
-----------------------------
-
 .. heading hierarchy:
    ------------- Chapter
    ************* Section (#.#)
    ============= Subsection (#.#.#)
    ############# Paragraph (no number)
 
-This is a suggested outline for adding new module documentation to |ns3|.
-See ``src/click/doc/click.rst`` for an example.
-
-The introductory paragraph is for describing what this code is trying to
-model.
-
-For consistency (italicized formatting), please use |ns3| to refer to
-ns-3 in the documentation (and likewise, |ns2| for ns-2).  These macros
-are defined in the file ``replace.txt``.
-
 Model Description
 *****************
 
 The source code for the new module lives in the directory ``contrib/botnet``.
 
-Add here a basic description of what is being modeled.
+It is dependent on ns-3.37 and BRITE.
 
 Design
 ======
-
-Briefly describe the software design of the model and how it fits into
-the existing ns-3 architecture.
+WIP
 
 Scope and Limitations
 =====================
 
-What can the model do?  What can it not do?  Please use this section to
-describe the scope and limitations of the model.
+The botnet module is currently able to simulate distributed pulsing attacks with a central controller in a BRITE topology.
 
-Future work
-===========
+Limitations (Future work)
+=========================
 
 Long term goal of this project is to be able to simulate realistic DDoS scenarios and generate DDoS datasets for research purposes.
 Currently, this module supports the generation of pulsing DDoS attacks.
@@ -50,9 +34,7 @@ Some possible future directions are:
 
 References
 ==========
-
-Add academic citations here, such as if you published a paper on this
-model, or if readers should read a particular specification or other work.
+TODO
 
 Usage
 *****
@@ -64,44 +46,72 @@ into more advanced topics.
 Building New Module
 ===================
 
-Include this subsection only if there are special build instructions or
-platform limitations.
+Install the BRITE library and configure ns-3 to use the library.
+
+``./ns3 configure --with-brite=<BRITE_path> --enable-examples --enable-tests``
+
 
 Helpers
 =======
 
-What helper API will users typically use?  Describe it here.
+``BotnetHelper``: The helper class for a botnet. It is used for:
 
-Attributes
+- ``CreateBotnet`` sets up the botnet, including choosing the bots from our topology. This is done by randomly picking a maximum of maxBotsPerAs from each existing AS in our topology.
+- Adding applications to the central controller(CC) and the bots with ``AddApplication``.
+- Setting the attributes of the added applications on the central controller and bots. The application index is needed to specify which application we are configurating.
+- Installing the applications onto the central controller and bots.
+
+Models
 ==========
 
-What classes hold attributes, and what are the key ones worth mentioning?
+``Botnet``: Where metainfo on the botnet is stored, including botnet name, type, size and the central controller node.
+
+``PulsingAttackCC``: The application model used for a central controller to simulate pulsing DDoS attacks.
+
+``PulsingAttackBot``: The application model for a bot for simulate pulsing DDoS attacks.
+
+Model Attributes
+================
+
+PulsingAttackBot
+----------------
+
+- ``ReceivePort``: The receiving port. Default value of 8000.
+- ``PacketSize``: Packet size of attack packets. Default value of 100.
+- ``TargetPort``: The target port that will receive the attack packets. Default value of 8081.
+- ``TargetAddress``: Target address that will receive the attack packets.
+- ``CCAddress``: Central controller address.
+- ``Rounds``: The number of attack rounds.
+- ``AttackInterval``: The interval between each round of attack.
+- ``CCPort``: Central controller port that to communicate with the bot.
+
+PulsingAttackCC
+---------------
+
+- ``ReceivePort``: The receiving port. Default value of 8080.
+- ``PacketSize``: Packet size of the command packet from central controller to bots.
+- ``RemotePort``: Port of the bot that will receive the command packet.
+- ``AttackTime``: The time gap between bot connection and attack. This value is needed because we have to wait for all bot connections to be finished.
 
 Output
 ======
 
-What kind of data does the model generate?  What are the key trace
-sources?   What kind of logging output can be enabled?
+Generate packet traces from the network simulation.
 
 Advanced Usage
 ==============
 
-Go into further details (such as using the API outside of the helpers)
-in additional sections, as needed.
+Users can create their own attack application models to install on the botnet and collect the resulting traces.
 
 Examples
 ========
 
-What examples using this new code are available?  Describe them here.
+``botnet-example`` and ``botnet-example-2`` differ by the size of the target network.
+For the former, we manually attach the target node to a leaf node of AS 0.
+For the latter, the target network topology is shown in ``examples/botnet-example-2-target-network.png``.
 
 Troubleshooting
 ===============
 
-Add any tips for avoiding pitfalls, etc.
-
-Validation
-**********
-
-Describe how the model has been tested/validated.  What tests run in the
-test suite?  How much API and code is covered by the tests?  Again,
-references to outside published work may help here.
+When debugging, do: ``./ns3 run botnet-example > logfile.txt 2>&1``
+to print out the logs. This saves the logs in a file and makes it easier to debug.
