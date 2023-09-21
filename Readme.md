@@ -6,8 +6,16 @@ This is a botnet module based on ns-3 and BRITE topology generator. This tool ca
 ## Dependencies
 This module is dependent on [ns-3.37](https://www.nsnam.org/releases/ns-3-37/) and BRITE. Refer to [BRITE integration](https://www.nsnam.org/docs/models/html/brite.html) for integration setup.
 
+Requires CMake version > 3.10
+
 ## Config file generation
 To generate config files with BRITE GUI, refer to [patched BRITE](https://github.com/nsol-nmsu/brite-patch.git).
+
+Change file name of seedfile.default to seedfile.
+
+Run: ```make``` to generate the GUI executable.
+
+Run: ```./britegui```
 
 Copy the generated file **GUI_GEN.conf** to botnet/examples/conf_files and change the conf_file variable in the botnet examples to try out different topologies.
 
