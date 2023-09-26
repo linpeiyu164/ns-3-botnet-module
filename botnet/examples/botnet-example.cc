@@ -108,11 +108,13 @@ main(int argc, char* argv[])
     bnh.SetAttributeBot(0, "StartTime", TimeValue(Seconds(0.0)));
     bnh.SetAttributeBot(0, "StopTime", TimeValue(Seconds(3.0)));
     bnh.SetAttributeBot(0, "Remote", Ipv4AddressValue(bnh.GetBotMasterAddress(0)));
+    bnh.SetAttributeBot(0, "Verbose", BooleanValue(true));
 
     /*Set attributes for 2nd v4ping*/
     bnh.SetAttributeBot(1, "StartTime", TimeValue(Seconds(4.0)));
     bnh.SetAttributeBot(1, "StopTime", TimeValue(Seconds(7.0)));
     bnh.SetAttributeBot(1, "Remote", Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0, 0)));
+    bnh.SetAttributeBot(1, "Verbose", BooleanValue(true));
 
     /*Set attributes for pulsing applications*/
     bnh.SetAttributeBot(2, "StartTime", TimeValue(Seconds(20.0)));

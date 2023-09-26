@@ -128,7 +128,7 @@ PulsingAttackCC::ContextToNodeId(std::string context)
 void
 PulsingAttackCC::CCRttTraceCallback(std::string context, Time rtt)
 {
-    NS_LOG_INFO("Rtt trace: " << context << " with value of: " << rtt);
+    NS_LOG_INFO("Rtt trace: " << context << " with value of: " << rtt.GetMilliSeconds());
     uint32_t nodeId = ContextToNodeId(context);
     Ptr<Node> node = NodeList::GetNode(nodeId);
     // Ipv4Address ipv4addr = node->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
@@ -188,7 +188,7 @@ PulsingAttackCC::ScheduleBots()
 void
 PulsingAttackCC::TargetRttTraceCallback(std::string context, Time rtt)
 {
-    NS_LOG_INFO("Rtt trace: " << context << " with a value of: " << rtt);
+    NS_LOG_INFO("Rtt trace: " << context << " with a value of: " << rtt.GetMilliSeconds());
     uint32_t nodeId = ContextToNodeId(context);
     Ptr<Node> node = NodeList::GetNode(nodeId);
     // Ipv4Address ipv4addr = node->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();

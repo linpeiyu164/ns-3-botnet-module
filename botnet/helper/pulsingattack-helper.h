@@ -7,28 +7,32 @@
 
 namespace ns3
 {
-    class PulsingAttackCCHelper
-    {
-        public:
-            PulsingAttackCCHelper();
-            ApplicationContainer Install(NodeContainer c) const;
-            ApplicationContainer Install(Ptr<Node> node) const;
-            void SetAttribute(std::string name, const AttributeValue& value);
-        private:
-            Ptr<Application> InstallPriv(Ptr<Node> node) const;
-            ObjectFactory m_factory;
-    };
 
-    class PulsingAttackBotHelper
-    {
-        public:
-            PulsingAttackBotHelper();
-            ApplicationContainer Install(NodeContainer c) const;
-            ApplicationContainer Install(Ptr<Node> node) const;
-            void SetAttribute(std::string name, const AttributeValue& value);
-        private:
-            Ptr<Application> InstallPriv(Ptr<Node> node) const;
-            ObjectFactory m_factory;
-    };
-}
+class PulsingAttackCCHelper
+{
+  public:
+    PulsingAttackCCHelper();
+    ApplicationContainer Install(NodeContainer c) const;
+    ApplicationContainer Install(Ptr<Node> node) const;
+    void SetAttribute(std::string name, const AttributeValue& value);
+
+  private:
+    Ptr<Application> InstallPriv(Ptr<Node> node) const;
+    ObjectFactory m_factory;
+};
+
+class PulsingAttackBotHelper
+{
+  public:
+    PulsingAttackBotHelper();
+    ApplicationContainer Install(NodeContainer c) const;
+    ApplicationContainer Install(Ptr<Node> node) const;
+    void SetAttribute(std::string name, const AttributeValue& value);
+
+  private:
+    Ptr<Application> InstallPriv(Ptr<Node> node) const;
+    ObjectFactory m_factory;
+};
+
+} // namespace ns3
 #endif
