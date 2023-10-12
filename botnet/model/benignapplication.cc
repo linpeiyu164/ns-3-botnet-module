@@ -33,8 +33,18 @@ BenignApplication::GetTypeId()
                           MakeUintegerChecker<uint16_t>())
             .AddAttribute("PacketSize",
                           "Packet size of attacking packets",
+                          StringValue("ns3::LogNormalRandomVariable"),
+                          MakePointerAccessor(&BenignApplication::m_packet_size_rv),
+                          MakePointerChecker<RandomVariableStream>())
+            .AddAttribute("MeanPacketSize",
+                          "Mean packet size of attacking packets",
                           UintegerValue(200),
-                          MakeUintegerAccessor(&BenignApplication::m_packet_size),
+                          MakeUintegerAccessor(&BenignApplication::m_mean_packet_size),
+                          MakeUintegerChecker<uint16_t>())
+            .AddAttribute("VariancePacketSize",
+                          "Variation of packet size",
+                          UintegerValue(2),
+                          MakeUintegerAccessor(&BenignApplication::m_sigma_packet_size),
                           MakeUintegerChecker<uint16_t>())
             .AddAttribute("SendingRate",
                           "Sending data rate, is a lognormal random variable",
@@ -43,7 +53,7 @@ BenignApplication::GetTypeId()
                           MakePointerChecker<RandomVariableStream>())
             .AddAttribute("MeanSendingRate",
                           "Mean sending rate",
-                          DoubleValue(50000.0),
+                          DoubleValue(8000.0),
                           MakeDoubleAccessor(&BenignApplication::m_mean_rate),
                           MakeDoubleChecker<double>())
             .AddAttribute("Sigma",
@@ -88,6 +98,15 @@ BenignApplication::StartApplication()
     m_data_rate->SetAttribute("Mu", DoubleValue(m_mu));
     m_data_rate->SetAttribute("Sigma", DoubleValue(m_sigma));
 
+<<<<<<< HEAD
+=======
+    m_packet_size_rv = CreateObject<LogNormalRandomVariable>();
+    double mu =
+        (double)std::log(m_mean_packet_size) - 0.5 * m_sigma_packet_size * m_sigma_packet_size;
+    m_packet_size_rv->SetAttribute("Mu", DoubleValue(mu));
+    m_packet_size_rv->SetAttribute("Sigma", DoubleValue(m_sigma_packet_size));
+
+>>>>>>> 7908269 (add benign traffic model with common destination)
     OpenConnection(m_target_socket, m_target_address, m_target_port);
     ScheduleNext();
 }
@@ -132,6 +151,10 @@ void
 BenignApplication::SendPacket()
 {
     NS_LOG_FUNCTION(this);
+<<<<<<< HEAD
+=======
+    // NS_LOG_INFO("m_packet_size: " << m_packet_size);
+>>>>>>> 7908269 (add benign traffic model with common destination)
     Ptr<Packet> packet = Create<Packet>(m_packet_size);
     int ret = m_target_socket->Send(packet);
     if (ret == -1)
@@ -148,18 +171,43 @@ void
 BenignApplication::ScheduleNext()
 {
     NS_LOG_FUNCTION(this);
+<<<<<<< HEAD
     uint32_t bits = m_packet_size * 8;
     m_instant_rate = DataRate(m_data_rate->GetInteger());
     Time nextSendingTime = Seconds(bits / (double)m_instant_rate.GetBitRate());
 
     EventId id = Simulator::Schedule(nextSendingTime, &BenignApplication::SendPacket, this);
     NS_LOG_INFO("Scheduled event after: " << nextSendingTime.GetMilliSeconds() << "milliseconds");
+=======
+    m_packet_size = m_packet_size_rv->GetInteger();
+
+    uint32_t bits = m_packet_size * 8;
+    m_instant_rate = DataRate(m_data_rate->GetInteger());
+    NS_LOG_INFO("Next packet size: (bit)" << m_packet_size);
+    NS_LOG_INFO("Instant rate (bit/s): " << m_instant_rate);
+    Time nextSendingTime = Seconds(bits / (double)m_instant_rate.GetBitRate());
+
+    m_send_event = Simulator::Schedule(nextSendingTime, &BenignApplication::SendPacket, this);
+    NS_LOG_INFO("Scheduled event after: " << nextSendingTime.GetMilliSeconds() << " milliseconds");
+}
+
+void
+BenignApplication::CancelEvent()
+{
+    NS_LOG_FUNCTION(this);
+    Simulator::Cancel(m_send_event);
+>>>>>>> 7908269 (add benign traffic model with common destination)
 }
 
 void
 BenignApplication::StopApplication()
 {
     NS_LOG_FUNCTION(this);
+<<<<<<< HEAD
+=======
+    CancelEvent();
+
+>>>>>>> 7908269 (add benign traffic model with common destination)
     // close target socket
     if (m_target_socket)
     {

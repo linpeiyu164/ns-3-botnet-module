@@ -25,9 +25,13 @@ class BenignApplication : public Application
     void OpenConnection(Ptr<Socket> socket, Ipv4Address addr, uint16_t port);
     void SendPacket();
     void ScheduleNext();
+    void CancelEvent();
 
     std::string m_model_type;
 
+    Ptr<RandomVariableStream> m_packet_size_rv;
+    uint16_t m_mean_packet_size;
+    uint16_t m_sigma_packet_size;
     uint16_t m_packet_size;
 
     Ptr<RandomVariableStream> m_data_rate; // model the datarate from one node as lognormal
@@ -39,6 +43,8 @@ class BenignApplication : public Application
     Ipv4Address m_target_address;
     uint16_t m_target_port;
     Ptr<Socket> m_target_socket;
+
+    EventId m_send_event;
 };
 
 } // namespace ns3

@@ -84,6 +84,7 @@ main(int argc, char* argv[])
                                       InetSocketAddress(Ipv4Address::GetAny(), sinkPort));
     ApplicationContainer sinkApps = packetSinkHelper.Install(targetNode);
     sinkApps.Start(Seconds(0.));
+    sinkApps.Stop(Seconds(1200.0));
 
     Ptr<PacketSink> packetSink = sinkApps.Get(0)->GetObject<PacketSink>();
     packetSink->TraceConnectWithoutContext("Rx", MakeCallback(&targetRx));
@@ -100,14 +101,14 @@ main(int argc, char* argv[])
 
     /*Set attributes for packet sinks*/
     bnh.SetAttributeBot(0, "StartTime", TimeValue(Seconds(0.0)));
-    bnh.SetAttributeBot(0, "StopTime", TimeValue(Seconds(5.0)));
+    bnh.SetAttributeBot(0, "StopTime", TimeValue(Seconds(1200.0)));
     bnh.SetAttributeBot(0, "Protocol", StringValue("ns3::TcpSocketFactory"));
     bnh.SetAttributeBot(0,
                         "Local",
                         AddressValue(InetSocketAddress(Ipv4Address::GetAny(), sinkPort)));
 
     bnh.SetAttributeBenign(0, "StartTime", TimeValue(Seconds(0.0)));
-    bnh.SetAttributeBenign(0, "StopTime", TimeValue(Seconds(5.0)));
+    bnh.SetAttributeBenign(0, "StopTime", TimeValue(Seconds(1200.0)));
     bnh.SetAttributeBenign(0, "Protocol", StringValue("ns3::TcpSocketFactory"));
     bnh.SetAttributeBenign(0,
                            "Local",
@@ -115,7 +116,7 @@ main(int argc, char* argv[])
 
     /*Set attributes for benign application*/
     bnh.SetAttributeBenign(1, "StartTime", TimeValue(Seconds(0.0)));
-    bnh.SetAttributeBenign(1, "StopTime", TimeValue(Seconds(5.0)));
+    bnh.SetAttributeBenign(1, "StopTime", TimeValue(Seconds(1200.0)));
     bnh.SetAttributeBenign(1,
                            "TargetAddress",
                            Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0, 0)));
