@@ -40,6 +40,7 @@ set(source_files
     model/botnet.cc
     model/pulsingattackcc.cc
     model/pulsingattackbot.cc
+    model/benignapplication.cc
     helper/botnet-helper.cc
     helper/pulsingattack-helper.cc)
 
@@ -47,6 +48,7 @@ set(header_files
     model/botnet.h
     model/pulsingattackcc.h
     model/pulsingattackbot.h
+    model/benignapplication.h
     helper/botnet-helper.h
     helper/pulsingattack-helper.h)
 
@@ -55,6 +57,7 @@ build_lib(
     SOURCE_FILES ${source_files}
     HEADER_FILES ${header_files}
     LIBRARIES_TO_LINK
+        ${libcore}
         ${libbrite}
         ${libinternet}
         ${libpoint-to-point}

@@ -45,7 +45,6 @@ PulsingAttackCCHelper::InstallPriv(Ptr<Node> node) const
 }
 
 /* Pulsing Attack Bot Helper */
-
 PulsingAttackBotHelper::PulsingAttackBotHelper()
 {
     m_factory.SetTypeId("ns3::PulsingAttackBot");

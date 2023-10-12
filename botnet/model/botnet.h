@@ -25,6 +25,7 @@ class Botnet
 
   private:
     std::vector<NodeContainer*> m_botNodes;
+    std::vector<NodeContainer*> m_benignNodes;
     BotnetType m_type;
     std::string m_name;
     Ptr<Node> m_botMaster;

@@ -28,7 +28,7 @@ BotnetHelper::SetupNodeMap()
     int i;
     for (i = 0; i < m_numAs; i++)
     {
-        m_nodeMap.push_back(std::vector<int>(m_numPerAs, 0));
+        m_nodeMap.push_back(std::vector<BotType>(m_numPerAs, BotType::UNINITIALIZED));
     }
     NS_LOG_DEBUG("m_nodeMap dimension: (" << m_nodeMap.size() << ", " << m_nodeMap[0].size()
                                           << ")");
@@ -66,10 +66,10 @@ BotnetHelper::CreateBotnet(
         for (nodeId = 0; nodeId < m_maxBotsPerAs; nodeId++)
         {
             botId = rand() % m_numPerAs;
-            if (!m_nodeMap[asId][botId])
+            if (m_nodeMap[asId][botId] == BotType::UNINITIALIZED)
             {
                 m_botnet->m_botNodes[asId]->Add(bth->GetNodeForAs(asId, botId));
-                m_nodeMap[asId][botId] = 1;
+                m_nodeMap[asId][botId] = BotType::BOT;
                 m_botnet->m_size++;
             }
         }
@@ -87,16 +87,31 @@ BotnetHelper::CreateBotnet(
         {
             asId = rand() % m_numAs;
             nodeId = rand() % (m_botnet->m_botNodes[asId]->GetN());
-        } while (m_nodeMap[asId][nodeId]);
+        } while (m_nodeMap[asId][nodeId] == BotType::BOT);
 
         m_botnet->m_botMaster = m_botnet->m_botNodes[asId]->Get(nodeId);
-        m_nodeMap[asId][nodeId] = 2;
+        m_nodeMap[asId][nodeId] = BotType::CENTRAL_CONTROLLER;
         m_botnet->m_botMasterAsId = asId;
         m_botnet->m_botMasterNodeId = nodeId;
         m_botnet->m_size++;
     }
 
-    NS_LOG_DEBUG("Total size: " << m_botnet->m_size);
+    /*Add benign nodes*/
+    for (asId = 0; asId < m_numAs; asId++)
+    {
+        m_botnet->m_benignNodes.push_back(new NodeContainer());
+        for (nodeId = 0; nodeId < m_numPerAs; nodeId++)
+        {
+            if (m_nodeMap[asId][nodeId] == BotType::UNINITIALIZED)
+            {
+                m_nodeMap[asId][nodeId] = BotType::BENIGN;
+                m_botnet->m_benignNodes[asId]->Add(bth->GetNodeForAs(asId, nodeId));
+            }
+        }
+        NS_LOG_INFO("Added benign nodes");
+    }
+
+    NS_LOG_DEBUG("Size of botnet: " << m_botnet->m_size);
 }
 
 void
@@ -113,6 +128,11 @@ BotnetHelper::AddApplication(BotType type, std::string typeId)
     {
         m_ccApps.push_back(app);
         m_ccApps[m_ccApps.size() - 1].SetTypeId(typeId);
+    }
+    else if (type == BotType::BENIGN)
+    {
+        m_benignApps.push_back(app);
+        m_benignApps[m_benignApps.size() - 1].SetTypeId(typeId);
     }
     else
     {
@@ -202,6 +222,7 @@ BotnetHelper::InstallApplications()
 {
     m_botAppContainer = ApplicationInstallBot(m_botnet->m_botNodes);
     m_ccAppContainer = ApplicationInstallCC(m_botnet->m_botMaster);
+    m_benignAppContainer = ApplicationInstallBenign(m_botnet->m_benignNodes);
 }
 
 void
@@ -220,10 +241,59 @@ BotnetHelper::SetAttributeBot(uint16_t appIndex, std::string name, const Attribu
     m_botApps[appIndex].Set(name, value);
 }
 
+void
+BotnetHelper::SetAttributeBenign(uint16_t appIndex, std::string name, const AttributeValue& value)
+{
+    NS_LOG_FUNCTION(this << appIndex << name << &value);
+    m_benignApps[appIndex].Set(name, value);
+}
+
 Ipv4Address
 BotnetHelper::GetBotMasterAddress(uint16_t netDeviceIndex)
 {
     return Ipv4Address::ConvertFrom(
         m_botnet->m_botMaster->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal());
 }
+
+ApplicationContainer
+BotnetHelper::ApplicationInstallBenign(std::vector<NodeContainer*>& vc) const
+{
+    NS_LOG_FUNCTION(this);
+    ApplicationContainer apps;
+
+    std::vector<NodeContainer*>::iterator it;
+    for (it = vc.begin(); it != vc.end(); it++)
+    {
+        for (NodeContainer::Iterator i = (*it)->Begin(); i != (*it)->End(); ++i)
+        {
+            apps.Add(InstallPrivBenign(*i));
+        }
+    }
+
+    return apps;
+}
+
+ApplicationContainer
+BotnetHelper::ApplicationInstallBenign(Ptr<Node> node) const
+{
+    NS_LOG_FUNCTION(this);
+    return ApplicationContainer(InstallPrivBenign(node));
+}
+
+ApplicationContainer
+BotnetHelper::InstallPrivBenign(Ptr<Node> node) const
+{
+    NS_LOG_FUNCTION(this);
+    ApplicationContainer apps;
+
+    for (auto it = m_benignApps.begin(); it != m_benignApps.end(); it++)
+    {
+        Ptr<Application> app = it->Create<Application>();
+        node->AddApplication(app);
+        apps.Add(app);
+    }
+
+    return apps;
+}
+
 } // namespace ns3

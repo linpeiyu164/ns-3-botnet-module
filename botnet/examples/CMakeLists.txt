@@ -21,3 +21,17 @@ build_lib_example(
         ${libbotnet}
         ${libinternet-apps}
 )
+
+
+build_lib_example(
+    NAME benign-example
+    SOURCE_FILES benign-example.cc
+    LIBRARIES_TO_LINK
+        ${libcore}
+        ${libbrite}
+        ${libinternet}
+        ${libpoint-to-point}
+        ${libapplications}
+        ${libbotnet}
+        ${libinternet-apps}
+)
