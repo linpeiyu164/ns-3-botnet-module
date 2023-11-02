@@ -75,7 +75,8 @@ PulsingAttackCC::StartApplication()
     else
     {
         socket->Listen();
-        Simulator::Schedule(Seconds(100), &PulsingAttackCC::ScheduleBots, this);
+        m_schedule_bots_event =
+            Simulator::Schedule(Seconds(100), &PulsingAttackCC::ScheduleBots, this);
     }
 }
 
@@ -87,7 +88,6 @@ PulsingAttackCC::HandleAccept(Ptr<Socket> socket, const Address& address)
     socket->SetRecvCallback(MakeCallback(&PulsingAttackCC::HandleRead, this));
     Ipv4Address ipv4 = InetSocketAddress::ConvertFrom(address).GetIpv4();
     NS_LOG_DEBUG("Accepted Ipv4 address: " << ipv4);
-    // m_recv_sockets[ipv4] = socket;
 }
 
 /* Handle packet reads */
@@ -99,10 +99,17 @@ PulsingAttackCC::HandleRead(Ptr<Socket> socket)
     while ((packet = socket->Recv()))
     {
         NS_LOG_DEBUG("packet received from bot to cc");
-        // get the rtt packet tag
-        // Address addr = socket->GetPeerName();
-        // UpdateRtt(addr, rtt);
-        // check if ScheduleSend should be called
+    }
+}
+
+void
+PulsingAttackCC::CancelEvent()
+{
+    NS_LOG_FUNCTION(this);
+    Simulator::Cancel(m_schedule_bots_event);
+    for (auto it = m_send_events.begin(); it != m_send_events.end(); it++)
+    {
+        Simulator::Cancel(*it);
     }
 }
 
@@ -110,11 +117,11 @@ void
 PulsingAttackCC::StopApplication()
 {
     NS_LOG_FUNCTION(this);
+    CancelEvent();
     for (auto it = m_socketMap.begin(); it != m_socketMap.end(); it++)
     {
         it->second->Close();
     }
-    // m_send_socket->Close();
 }
 
 uint32_t
@@ -131,9 +138,7 @@ PulsingAttackCC::CCRttTraceCallback(std::string context, Time rtt)
     NS_LOG_INFO("Rtt trace: " << context << " with value of: " << rtt.GetMilliSeconds());
     uint32_t nodeId = ContextToNodeId(context);
     Ptr<Node> node = NodeList::GetNode(nodeId);
-    // Ipv4Address ipv4addr = node->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
     PulsingAttackCC::m_ccRttTable[nodeId] = rtt;
-    // NS_LOG_INFO("CC Ipv4 Address: " << ipv4addr);
 }
 
 void
@@ -181,7 +186,9 @@ PulsingAttackCC::ScheduleBots()
                 NS_LOG_DEBUG("socket succeeded in connecting from cc to bot");
             }
         }
-        Simulator::Schedule(commandTime, &PulsingAttackCC::SendCommand, this, it->first);
+        EventId id =
+            Simulator::Schedule(commandTime, &PulsingAttackCC::SendCommand, this, it->first);
+        m_send_events.push_back(id);
     }
 }
 
@@ -191,17 +198,13 @@ PulsingAttackCC::TargetRttTraceCallback(std::string context, Time rtt)
     NS_LOG_INFO("Rtt trace: " << context << " with a value of: " << rtt.GetMilliSeconds());
     uint32_t nodeId = ContextToNodeId(context);
     Ptr<Node> node = NodeList::GetNode(nodeId);
-    // Ipv4Address ipv4addr = node->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
     PulsingAttackCC::m_targetRttTable[nodeId] = rtt;
-    // NS_LOG_INFO("Target Ipv4 Address: " << ipv4addr);
 }
 
 void
 PulsingAttackCC::SendCommand(uint32_t nodeId)
 {
     NS_LOG_FUNCTION(this);
-    // Ipv4Address ipv4;
-    // NS_LOG_DEBUG("Finding corresponding socket to: " << ipv4);
     Ptr<Packet> packet = Create<Packet>(m_packet_size);
     Ptr<Socket> socket = m_socketMap[nodeId];
     if (!socket)

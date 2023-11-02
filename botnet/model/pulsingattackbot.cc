@@ -111,9 +111,17 @@ PulsingAttackBot::HandleAccept(Ptr<Socket> socket, const Address& address)
 }
 
 void
+PulsingAttackBot::CancelEvent()
+{
+    NS_LOG_FUNCTION(this);
+    Simulator::Cancel(m_send_event);
+}
+
+void
 PulsingAttackBot::StopApplication()
 {
     NS_LOG_FUNCTION(this);
+    CancelEvent();
     m_target_socket->Close();
     m_cc_socket->Close();
 }
@@ -180,7 +188,8 @@ PulsingAttackBot::SendPacketTarget()
     m_rounds--;
     if (m_rounds > 0)
     {
-        Simulator::Schedule(m_attack_interval, &PulsingAttackBot::SendPacketTarget, this);
+        m_send_event =
+            Simulator::Schedule(m_attack_interval, &PulsingAttackBot::SendPacketTarget, this);
     }
 }
 

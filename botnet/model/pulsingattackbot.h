@@ -27,6 +27,7 @@ class PulsingAttackBot : public Application
     void RttCallback(Time rtt); // callback for pingv4
 
   private:
+    void CancelEvent();
     void OpenConnection(Ptr<Socket> socket, Ipv4Address addr, uint16_t port);
 
     void HandleAccept(Ptr<Socket> socket, const Address& address);
@@ -48,6 +49,8 @@ class PulsingAttackBot : public Application
     uint16_t m_rounds;
 
     double m_rtt;
+
+    EventId m_send_event;
 };
 } // namespace ns3
 

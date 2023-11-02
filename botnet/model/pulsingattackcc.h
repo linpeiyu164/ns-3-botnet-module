@@ -25,7 +25,6 @@ class PulsingAttackCC : public Application
 
     inline static std::unordered_map<uint32_t, Time> m_ccRttTable;
     inline static std::unordered_map<uint32_t, Time> m_targetRttTable;
-    // std::unordered_map<Ipv4Address, Ptr<Socket>, Ipv4AddressHash> m_recv_sockets;
     std::unordered_map<uint32_t, Ptr<Socket>> m_socketMap;
 
   private:
@@ -46,6 +45,8 @@ class PulsingAttackCC : public Application
 
     void SendCommand(uint32_t nodeId);
 
+    void CancelEvent();
+
     // Ptr<Socket> m_recv_socket;
     uint16_t m_recv_port;
 
@@ -56,14 +57,13 @@ class PulsingAttackCC : public Application
 
     uint32_t m_packet_size;
 
-    // m_rtt[botUid][rtt_total]
-    // rtt_total = bot_target_rtt + master_bot_rtt
-    // std::vector<std::vector<double>> m_rtt;
-    // std::unordered_map<Ipv4Address, double, Ipv4AddressHash> m_rtt;
-
     Time m_maxDelay;
 
     Time m_attack_time;
+
+    std::vector<EventId> m_send_events;
+
+    EventId m_schedule_bots_event;
 };
 } // namespace ns3
 #endif /* ATTACK_H */
