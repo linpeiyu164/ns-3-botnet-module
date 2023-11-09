@@ -98,15 +98,12 @@ BenignApplication::StartApplication()
     m_data_rate->SetAttribute("Mu", DoubleValue(m_mu));
     m_data_rate->SetAttribute("Sigma", DoubleValue(m_sigma));
 
-<<<<<<< HEAD
-=======
     m_packet_size_rv = CreateObject<LogNormalRandomVariable>();
     double mu =
         (double)std::log(m_mean_packet_size) - 0.5 * m_sigma_packet_size * m_sigma_packet_size;
     m_packet_size_rv->SetAttribute("Mu", DoubleValue(mu));
     m_packet_size_rv->SetAttribute("Sigma", DoubleValue(m_sigma_packet_size));
 
->>>>>>> 7908269 (add benign traffic model with common destination)
     OpenConnection(m_target_socket, m_target_address, m_target_port);
     ScheduleNext();
 }
@@ -151,10 +148,7 @@ void
 BenignApplication::SendPacket()
 {
     NS_LOG_FUNCTION(this);
-<<<<<<< HEAD
-=======
     // NS_LOG_INFO("m_packet_size: " << m_packet_size);
->>>>>>> 7908269 (add benign traffic model with common destination)
     Ptr<Packet> packet = Create<Packet>(m_packet_size);
     int ret = m_target_socket->Send(packet);
     if (ret == -1)
@@ -171,14 +165,6 @@ void
 BenignApplication::ScheduleNext()
 {
     NS_LOG_FUNCTION(this);
-<<<<<<< HEAD
-    uint32_t bits = m_packet_size * 8;
-    m_instant_rate = DataRate(m_data_rate->GetInteger());
-    Time nextSendingTime = Seconds(bits / (double)m_instant_rate.GetBitRate());
-
-    EventId id = Simulator::Schedule(nextSendingTime, &BenignApplication::SendPacket, this);
-    NS_LOG_INFO("Scheduled event after: " << nextSendingTime.GetMilliSeconds() << "milliseconds");
-=======
     m_packet_size = m_packet_size_rv->GetInteger();
 
     uint32_t bits = m_packet_size * 8;
@@ -196,18 +182,14 @@ BenignApplication::CancelEvent()
 {
     NS_LOG_FUNCTION(this);
     Simulator::Cancel(m_send_event);
->>>>>>> 7908269 (add benign traffic model with common destination)
 }
 
 void
 BenignApplication::StopApplication()
 {
     NS_LOG_FUNCTION(this);
-<<<<<<< HEAD
-=======
     CancelEvent();
 
->>>>>>> 7908269 (add benign traffic model with common destination)
     // close target socket
     if (m_target_socket)
     {
