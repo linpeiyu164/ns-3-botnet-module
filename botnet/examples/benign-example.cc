@@ -123,6 +123,12 @@ main(int argc, char* argv[])
                            "TargetAddress",
                            Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0, 0)));
     bnh.SetAttributeBenign(1, "TargetPort", UintegerValue(sinkPort));
+    bnh.SetAttributeBenign(1,
+                           "DataRateRandomVariableType",
+                           StringValue("ns3::UniformRandomVariable"));
+    bnh.SetAttributeBenign(1,
+                           "PacketSizeRandomVariableType",
+                           StringValue("ns3::UniformRandomVariable"));
 
     bnh.InstallApplications();
 

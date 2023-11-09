@@ -26,19 +26,24 @@ class BenignApplication : public Application
     void SendPacket();
     void ScheduleNext();
     void CancelEvent();
+    void SetRandomStreamAttributes(Ptr<RandomVariableStream> rv_stream,
+                                   std::string rv_type,
+                                   double mean,
+                                   double stddev);
 
-    std::string m_model_type;
-
+    // Packet size random variable is lognormal by default
     Ptr<RandomVariableStream> m_packet_size_rv;
-    uint16_t m_mean_packet_size;
-    uint16_t m_sigma_packet_size;
-    uint16_t m_packet_size;
+    std::string m_packet_size_rv_type;
+    double m_packet_size_mean;
+    double m_packet_size_stddev;
+    uint16_t m_current_packet_size; // records the generated instant packet size
 
-    Ptr<RandomVariableStream> m_data_rate; // model the datarate from one node as lognormal
-    double m_mu;
-    double m_sigma;
-    double m_mean_rate;
-    DataRate m_instant_rate;
+    // Data rate random variable is lognormal by default
+    Ptr<RandomVariableStream> m_data_rate_rv;
+    std::string m_data_rate_rv_type;
+    double m_data_rate_mean;      // attributes
+    double m_data_rate_stddev;    // attributes
+    DataRate m_instant_data_rate; // records the generated instant data rate
 
     Ipv4Address m_target_address;
     uint16_t m_target_port;
