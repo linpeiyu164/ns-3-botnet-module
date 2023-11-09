@@ -70,6 +70,8 @@ main(int argc, char* argv[])
     stack.Install(targetNode);
 
     p2p.SetChannelAttribute("Delay", TimeValue(MilliSeconds(2.0)));
+    p2p.SetDeviceAttribute("DataRate", StringValue("50Mbps"));
+
     NetDeviceContainer p2pTargetDevices = p2p.Install(targetNetwork);
 
     Ipv4InterfaceContainer targetNetworkInterfaces;

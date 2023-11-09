@@ -61,6 +61,10 @@ Change configuration to enable python bindings:
 
 `./ns3 configure --with-brite=<BRITE_path> --enable-examples --enable-tests --enable-python-bindings`
 
+Add BRITE library to LD_LIBRARY_PATH:
+
+`export LD_LIBRARY_PATH=<brite path>:$LD_LIBRARY_PATH`
+
 Run examples:
 
 `./ns3 run <example-application> --vis`

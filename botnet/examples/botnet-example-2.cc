@@ -76,6 +76,7 @@ main(int argc, char* argv[])
     - switch 1st ring: index = 10
     - target node: index = 11
     */
+    p2p.SetDeviceAttribute("DataRate", StringValue("10Kbps"));
     p2p.SetChannelAttribute("Delay", TimeValue(MilliSeconds(2.0)));
 
     NodeContainer pairs[21];
