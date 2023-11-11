@@ -38,6 +38,7 @@ main(int argc, char* argv[])
     LogComponentEnable("V4Ping", LOG_ALL);
     LogComponentEnable("Config", LOG_ALL);
     LogComponentEnable("BriteTopologyHelper", LOG_ALL);
+    LogComponentEnable("BotnetHelper", LOG_ALL);
 
     std::string confFile = "contrib/botnet/examples/conf_files/GUI_GEN3.conf";
 
@@ -95,6 +96,7 @@ main(int argc, char* argv[])
     BotnetHelper bnh;
     int maxBotsPerAs = 10;
     bnh.CreateBotnet(&bth, maxBotsPerAs, BotnetType::CENTRALIZED, "mybotnet");
+    bnh.CreateBenignNodes(&bth);
 
     /*Setup apps for CC*/
     bnh.AddApplication(BotType::CENTRAL_CONTROLLER, "ns3::PulsingAttackCC");

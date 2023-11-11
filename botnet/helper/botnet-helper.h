@@ -23,9 +23,12 @@ class BotnetHelper
 
     /* creates botnet based on topology */
     void CreateBotnet(BriteTopologyHelper* bth,
-                      int maxBotsPerAS,
+                      uint32_t maxBotsPerAS,
                       BotnetType type,
                       std::string name);
+
+    /* creates benign nodes, which are the leftover leaf nodes*/
+    void CreateBenignNodes(BriteTopologyHelper* bth);
 
     // install all cc and bot applications
     void InstallApplications();
@@ -42,9 +45,9 @@ class BotnetHelper
 
   private:
     Botnet* m_botnet;
-    int m_numAs;
-    int m_numPerAs;
-    int m_maxBotsPerAs;
+    uint32_t m_numAs;
+    std::vector<uint32_t> m_numLeafPerAs;
+    uint32_t m_maxBotsPerAs;
     std::vector<std::vector<BotType>> m_nodeMap;
     std::vector<ObjectFactory> m_ccApps;
     std::vector<ObjectFactory> m_botApps;

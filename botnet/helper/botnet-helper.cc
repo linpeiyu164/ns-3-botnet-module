@@ -13,7 +13,7 @@ BotnetHelper::BotnetHelper()
 {
     NS_LOG_FUNCTION(this);
     m_numAs = 0;
-    m_numPerAs = 0;
+    m_numLeafPerAs = std::vector<uint32_t>(m_numAs, 0);
     m_maxBotsPerAs = 0;
 }
 
@@ -21,104 +21,132 @@ void
 BotnetHelper::SetupNodeMap()
 {
     NS_LOG_FUNCTION(this);
-    if (m_numAs <= 0 || m_numPerAs <= 0)
+
+    uint32_t asId;
+    for (asId = 0; asId < m_numAs; asId++)
     {
-        exit(1);
+        m_nodeMap.push_back(std::vector<BotType>(m_numLeafPerAs[asId], BotType::UNINITIALIZED));
     }
-    int i;
-    for (i = 0; i < m_numAs; i++)
-    {
-        m_nodeMap.push_back(std::vector<BotType>(m_numPerAs, BotType::UNINITIALIZED));
-    }
-    NS_LOG_DEBUG("m_nodeMap dimension: (" << m_nodeMap.size() << ", " << m_nodeMap[0].size()
-                                          << ")");
 }
 
 void
-BotnetHelper::CreateBotnet(
-    // std::vector<NodeContainer*>& nodesByAs,
-    BriteTopologyHelper* bth,
-    int maxBotsPerAs,
-    BotnetType type,
-    std::string name)
+BotnetHelper::CreateBotnet(BriteTopologyHelper* bth,
+                           uint32_t maxBotsPerAs,
+                           BotnetType type,
+                           std::string name)
 {
     NS_LOG_FUNCTION(this);
 
-    m_numAs = bth->GetNAs();
-    m_numPerAs = bth->GetNNodesForAs(0);
-    m_maxBotsPerAs = maxBotsPerAs;
+    uint32_t asId, leafId, count;
 
-    NS_LOG_DEBUG("Num AS: " << m_numAs << ", Num per AS: " << m_numPerAs
-                            << ", bots per AS: " << maxBotsPerAs);
+    // Get number of ASes
+    m_numAs = bth->GetNAs();
+    if (m_numAs > 0)
+    {
+        NS_LOG_INFO("Number of ASes: " << m_numAs);
+    }
+    else
+    {
+        NS_LOG_ERROR("Number of ASes is zero");
+        exit(1);
+    }
+
+    // Get number of leaf nodes in each AS
+    for (asId = 0; asId < m_numAs; asId++)
+    {
+        uint32_t num = bth->GetNLeafNodesForAs(asId);
+
+        NS_LOG_INFO("AS: " << asId << ", Leaf nodes: " << num);
+        m_numLeafPerAs.push_back(num);
+    }
+
+    m_maxBotsPerAs = maxBotsPerAs;
 
     SetupNodeMap();
 
     m_botnet = new Botnet(type, name);
-
-    int asId, nodeId;
-    int botId;
 
     srand(time(NULL));
 
     for (asId = 0; asId < m_numAs; asId++)
     {
         m_botnet->m_botNodes.push_back(new NodeContainer());
-        for (nodeId = 0; nodeId < m_maxBotsPerAs; nodeId++)
+
+        // make sure leaf nodes exist in asId, otherwise modular will fail
+        if (m_numLeafPerAs[asId] > 0)
         {
-            botId = rand() % m_numPerAs;
-            if (m_nodeMap[asId][botId] == BotType::UNINITIALIZED)
+            for (count = 0; count < m_maxBotsPerAs; count++)
             {
-                m_botnet->m_botNodes[asId]->Add(bth->GetNodeForAs(asId, botId));
-                m_nodeMap[asId][botId] = BotType::BOT;
-                m_botnet->m_size++;
+                leafId = rand() % m_numLeafPerAs[asId];
+                if (m_nodeMap[asId][leafId] == BotType::UNINITIALIZED)
+                {
+                    m_botnet->m_botNodes[asId]->Add(bth->GetLeafNodeForAs(asId, leafId));
+                    m_nodeMap[asId][leafId] = BotType::BOT;
+                    m_botnet->m_size++;
+                }
             }
         }
-        NS_LOG_DEBUG("Num nodes in container: " << m_botnet->m_botNodes[asId]->GetN());
+        NS_LOG_DEBUG("Number of bots in AS " << asId << ": " << m_botnet->m_botNodes[asId]->GetN());
     }
 
-    NS_LOG_DEBUG("Total size: " << m_botnet->m_size);
-
+    // BotnetType
     if (type == BotnetType::CENTRALIZED)
     {
-        /* centralized */
-        /* choose bot master asId + nodeId */
-
+        // Add central controller
+        // If your code ever gets stuck here, make the topology bigger
         do
         {
+            // Choose AS with leaf nodes
             asId = rand() % m_numAs;
-            nodeId = rand() % (m_botnet->m_botNodes[asId]->GetN());
-        } while (m_nodeMap[asId][nodeId] == BotType::BOT);
+            while (m_numLeafPerAs[asId] <= 0)
+            {
+                asId = rand() % m_numAs;
+            }
+            // Choose a random leaf node
+            leafId = rand() % (m_numLeafPerAs[asId]);
 
-        m_botnet->m_botMaster = m_botnet->m_botNodes[asId]->Get(nodeId);
-        m_nodeMap[asId][nodeId] = BotType::CENTRAL_CONTROLLER;
+        } while (m_nodeMap[asId][leafId] == BotType::BOT);
+
+        m_botnet->m_botMaster = bth->GetLeafNodeForAs(asId, leafId);
+        m_nodeMap[asId][leafId] = BotType::CENTRAL_CONTROLLER;
         m_botnet->m_botMasterAsId = asId;
-        m_botnet->m_botMasterNodeId = nodeId;
+        m_botnet->m_botMasterLeafId = leafId;
         m_botnet->m_size++;
-    }
 
-    /*Add benign nodes*/
+        NS_LOG_INFO("Central controller: (ASIndex, LeafIndex) = ("
+                    << m_botnet->m_botMasterAsId << ", " << m_botnet->m_botMasterLeafId << ")");
+        NS_LOG_INFO("Botnet size: " << m_botnet->m_size);
+    }
+    else
+    {
+        NS_LOG_ERROR("BotnetType" << uint16_t(type) << " not yet supported");
+    }
+}
+
+void
+BotnetHelper::CreateBenignNodes(BriteTopologyHelper* bth)
+{
+    // Add benign nodes
+    uint32_t asId, leafId;
     for (asId = 0; asId < m_numAs; asId++)
     {
         m_botnet->m_benignNodes.push_back(new NodeContainer());
-        for (nodeId = 0; nodeId < m_numPerAs; nodeId++)
+        for (leafId = 0; leafId < m_numLeafPerAs[asId]; leafId++)
         {
-            if (m_nodeMap[asId][nodeId] == BotType::UNINITIALIZED)
+            if (m_nodeMap[asId][leafId] == BotType::UNINITIALIZED)
             {
-                m_nodeMap[asId][nodeId] = BotType::BENIGN;
-                m_botnet->m_benignNodes[asId]->Add(bth->GetNodeForAs(asId, nodeId));
+                m_nodeMap[asId][leafId] = BotType::BENIGN;
+                m_botnet->m_benignNodes[asId]->Add(bth->GetLeafNodeForAs(asId, leafId));
             }
         }
-        NS_LOG_INFO("Added benign nodes");
+        NS_LOG_INFO("AS " << asId << ", Benign nodes: " << m_botnet->m_benignNodes[asId]->GetN());
     }
-
-    NS_LOG_DEBUG("Size of botnet: " << m_botnet->m_size);
 }
 
 void
 BotnetHelper::AddApplication(BotType type, std::string typeId)
 {
     ObjectFactory app;
-
     if (type == BotType::BOT)
     {
         m_botApps.push_back(app);
@@ -136,7 +164,7 @@ BotnetHelper::AddApplication(BotType type, std::string typeId)
     }
     else
     {
-        NS_LOG_ERROR("Error: no BotType " << uint16_t(type));
+        NS_LOG_ERROR("BotType " << uint16_t(type) << " not supported");
     }
 }
 

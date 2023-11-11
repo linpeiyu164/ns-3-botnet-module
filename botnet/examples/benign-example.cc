@@ -96,6 +96,9 @@ main(int argc, char* argv[])
     int maxBotsPerAs = 2;
     bnh.CreateBotnet(&bth, maxBotsPerAs, BotnetType::CENTRALIZED, "botnet");
 
+    // Initialize benign nodes
+    bnh.CreateBenignNodes(&bth);
+
     /*Setup apps for nodes*/
     bnh.AddApplication(BotType::BOT, "ns3::PacketSink");
     bnh.AddApplication(BotType::BENIGN, "ns3::PacketSink");
@@ -125,10 +128,10 @@ main(int argc, char* argv[])
     bnh.SetAttributeBenign(1, "TargetPort", UintegerValue(sinkPort));
     bnh.SetAttributeBenign(1,
                            "DataRateRandomVariableType",
-                           StringValue("ns3::UniformRandomVariable"));
+                           StringValue("ns3::LogNormalRandomVariable"));
     bnh.SetAttributeBenign(1,
                            "PacketSizeRandomVariableType",
-                           StringValue("ns3::UniformRandomVariable"));
+                           StringValue("ns3::ConstantRandomVariable"));
 
     bnh.InstallApplications();
 
