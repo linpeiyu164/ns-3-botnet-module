@@ -30,10 +30,25 @@ class BotnetHelper
     /* creates benign nodes, which are the leftover leaf nodes*/
     void CreateBenignNodes(BriteTopologyHelper* bth);
 
-    // install all cc and bot applications
+    /*install all cc and bot applications*/
     void InstallApplications();
 
+    /*add an application based on its typeid string*/
     void AddApplication(BotType type, std::string);
+
+    /*get total number of bot nodes including central controller*/
+    uint32_t GetNBots();
+
+    /*get total number of benign nodes*/
+    uint32_t GetNBenign();
+
+    /*get bot with index num among all bots, does not consider which AS bot belongs to*/
+    Ptr<Node> GetBot(uint16_t num);
+
+    /*get benign node with index num among all benign nodes*/
+    Ptr<Node> GetBenign(uint16_t num);
+
+    Ptr<Node> GetCC();
 
     ApplicationContainer ApplicationInstallBot(std::vector<NodeContainer*>& c) const;
     ApplicationContainer ApplicationInstallBenign(std::vector<NodeContainer*>& c) const;

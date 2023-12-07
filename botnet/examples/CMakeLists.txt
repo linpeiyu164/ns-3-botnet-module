@@ -22,10 +22,22 @@ build_lib_example(
         ${libinternet-apps}
 )
 
-
 build_lib_example(
     NAME benign-example
     SOURCE_FILES benign-example.cc
+    LIBRARIES_TO_LINK
+        ${libcore}
+        ${libbrite}
+        ${libinternet}
+        ${libpoint-to-point}
+        ${libapplications}
+        ${libbotnet}
+        ${libinternet-apps}
+)
+
+build_lib_example(
+    NAME link-flooding-example
+    SOURCE_FILES link-flooding-example.cc
     LIBRARIES_TO_LINK
         ${libcore}
         ${libbrite}

@@ -81,8 +81,9 @@ BotnetHelper::CreateBotnet(BriteTopologyHelper* bth,
                 if (m_nodeMap[asId][leafId] == BotType::UNINITIALIZED)
                 {
                     m_botnet->m_botNodes[asId]->Add(bth->GetLeafNodeForAs(asId, leafId));
+                    m_botnet->m_botNodesAll->Add(bth->GetLeafNodeForAs(asId, leafId));
                     m_nodeMap[asId][leafId] = BotType::BOT;
-                    m_botnet->m_size++;
+                    m_botnet->m_botNum++;
                 }
             }
         }
@@ -111,11 +112,11 @@ BotnetHelper::CreateBotnet(BriteTopologyHelper* bth,
         m_nodeMap[asId][leafId] = BotType::CENTRAL_CONTROLLER;
         m_botnet->m_botMasterAsId = asId;
         m_botnet->m_botMasterLeafId = leafId;
-        m_botnet->m_size++;
+        // m_botnet->m_botNum++;
 
         NS_LOG_INFO("Central controller: (ASIndex, LeafIndex) = ("
                     << m_botnet->m_botMasterAsId << ", " << m_botnet->m_botMasterLeafId << ")");
-        NS_LOG_INFO("Botnet size: " << m_botnet->m_size);
+        NS_LOG_INFO("Botnet size: " << m_botnet->m_botNum);
     }
     else
     {
@@ -137,10 +138,52 @@ BotnetHelper::CreateBenignNodes(BriteTopologyHelper* bth)
             {
                 m_nodeMap[asId][leafId] = BotType::BENIGN;
                 m_botnet->m_benignNodes[asId]->Add(bth->GetLeafNodeForAs(asId, leafId));
+                m_botnet->m_benignNodesAll->Add(bth->GetLeafNodeForAs(asId, leafId));
+                m_botnet->m_benignNum++;
             }
         }
         NS_LOG_INFO("AS " << asId << ", Benign nodes: " << m_botnet->m_benignNodes[asId]->GetN());
     }
+}
+
+uint32_t
+BotnetHelper::GetNBots()
+{
+    return m_botnet->m_botNum;
+}
+
+uint32_t
+BotnetHelper::GetNBenign()
+{
+    return m_botnet->m_benignNum;
+}
+
+Ptr<Node>
+BotnetHelper::GetBot(uint16_t num)
+{
+    if (num < 0 || num >= m_botnet->m_botNum)
+    {
+        NS_LOG_ERROR("No bot with index: " << num);
+    }
+
+    return m_botnet->m_botNodesAll->Get(num);
+}
+
+Ptr<Node>
+BotnetHelper::GetBenign(uint16_t num)
+{
+    if (num < 0 || num >= m_botnet->m_benignNum)
+    {
+        NS_LOG_ERROR("No benign node with index: " << num);
+    }
+
+    return m_botnet->m_benignNodesAll->Get(num);
+}
+
+Ptr<Node>
+BotnetHelper::GetCC()
+{
+    return m_botnet->m_botMaster;
 }
 
 void

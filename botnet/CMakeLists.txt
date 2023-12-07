@@ -41,6 +41,8 @@ set(source_files
     model/pulsingattackcc.cc
     model/pulsingattackbot.cc
     model/benignapplication.cc
+    model/linkfloodingattack.cc
+    model/linkfloodingattackcc.cc
     helper/botnet-helper.cc
     helper/pulsingattack-helper.cc)
 
@@ -49,6 +51,8 @@ set(header_files
     model/pulsingattackcc.h
     model/pulsingattackbot.h
     model/benignapplication.h
+    model/linkfloodingattack.h
+    model/linkfloodingattackcc.h
     helper/botnet-helper.h
     helper/pulsingattack-helper.h)
 

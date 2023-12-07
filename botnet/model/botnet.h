@@ -21,11 +21,18 @@ class Botnet
   public:
     Botnet(BotnetType type, std::string name);
     friend class BotnetHelper;
-    uint32_t m_size;
+    // number of bots (exclude central controller)
+    uint32_t m_botNum;
+    // number of benign nodes
+    uint32_t m_benignNum;
 
   private:
     std::vector<NodeContainer*> m_botNodes;
     std::vector<NodeContainer*> m_benignNodes;
+
+    NodeContainer* m_botNodesAll;
+    NodeContainer* m_benignNodesAll;
+
     BotnetType m_type;
     std::string m_name;
     Ptr<Node> m_botMaster;
