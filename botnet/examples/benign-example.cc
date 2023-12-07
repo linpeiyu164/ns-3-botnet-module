@@ -100,17 +100,8 @@ main(int argc, char* argv[])
     bnh.CreateBenignNodes(&bth);
 
     /*Setup apps for nodes*/
-    bnh.AddApplication(BotType::BOT, "ns3::PacketSink");
     bnh.AddApplication(BotType::BENIGN, "ns3::PacketSink");
     bnh.AddApplication(BotType::BENIGN, "ns3::BenignApplication");
-
-    /*Set attributes for packet sinks*/
-    bnh.SetAttributeBot(0, "StartTime", TimeValue(Seconds(0.0)));
-    bnh.SetAttributeBot(0, "StopTime", TimeValue(Seconds(1200.0)));
-    bnh.SetAttributeBot(0, "Protocol", StringValue("ns3::TcpSocketFactory"));
-    bnh.SetAttributeBot(0,
-                        "Local",
-                        AddressValue(InetSocketAddress(Ipv4Address::GetAny(), sinkPort)));
 
     bnh.SetAttributeBenign(0, "StartTime", TimeValue(Seconds(0.0)));
     bnh.SetAttributeBenign(0, "StopTime", TimeValue(Seconds(1200.0)));
