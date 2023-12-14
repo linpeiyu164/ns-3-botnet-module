@@ -126,17 +126,13 @@ Install the BRITE library and configure ns-3 to use the library.
 Helpers
 ~~~~~~~
 Main interfaces of ``BotnetHelper``:
-
 - ``CreateBotnet`` sets up the botnet, including choosing the bots from our topology.
 This is done by randomly picking a maximum of maxBotsPerAs from each existing AS in
 our topology.
-
 - ``AddApplication``: Adding applications to benign/bot/central controller nodes.
-
 - ``SetAttributeBot``, ``SetAttributeCC``, ``SetAttributeBenign``:
 Set attributes of the added applications on the bots, central controller, and benign nodes.
 The application index is needed to specify which application we are configurating.
-
 - ``InstallApplications``: Install the added applications onto the central controller and bots.
 
 Model Attributes
@@ -182,12 +178,9 @@ LinkFloodingAttackCC
 
 BenignApplication
 -----------------
-- ``TargetAddress``
-- ``TargetPort``
-- ``PacketSizeRandomVariableType``: Type of random variable for packet size. If the user wants to change the random
-variable type for the packet size, this value should be changed. Supported types include
-are: ``ns3::NormalRandomVariable``, ``ns3::LogNormalRandomVariable``,
-``ConstantRandomVariable``, ``UniformRandomVariable``.
+- ``TargetAddress``: Target address of packet sink.
+- ``TargetPort``: Target port on packet sink that will receive the attack packets.
+- ``PacketSizeRandomVariableType``: Type of random variable for packet size. If the user wants to change the random variable type for the packet size, this value should be changed. Supported types include: ``ns3::NormalRandomVariable``, ``ns3::LogNormalRandomVariable``, ``ConstantRandomVariable``, ``UniformRandomVariable``.
 - ``PacketSizeRandomVariable``: Packet size random variable stream (bytes).
 - ``PacketSizeMean``: Mean value of packet size random variable (bytes).
 - ``PacketSizeStdDev``: Standard deviation of packet size random variable (bytes).
