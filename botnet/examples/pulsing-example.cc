@@ -52,6 +52,7 @@ main(int argc, char* argv[])
     PointToPointHelper p2p;
 
     // p2p.DisableFlowControl();
+    p2p.SetQueue("ns3::DropTailQueue", "MaxSize", StringValue("100p"));
 
     InternetStackHelper stack;
 
@@ -75,8 +76,8 @@ main(int argc, char* argv[])
     stack.Install(targetNode);
 
     p2p.SetChannelAttribute("Delay", TimeValue(MilliSeconds(2.0)));
-    p2p.SetDeviceAttribute("DataRate", StringValue("10Kbps"));
-    p2p.SetQueue("ns3::DropTailQueue", "MaxSize", StringValue("10p"));
+    p2p.SetDeviceAttribute("DataRate", StringValue("1000Kbps"));
+    p2p.SetQueue("ns3::DropTailQueue", "MaxSize", StringValue("100p"));
     NetDeviceContainer p2pTargetDevices = p2p.Install(targetNetwork);
 
     Ipv4InterfaceContainer targetNetworkInterfaces;
@@ -128,7 +129,8 @@ main(int argc, char* argv[])
                         "TargetAddress",
                         Ipv4AddressValue(targetNetworkInterfaces.GetAddress(0, 0)));
     bnh.SetAttributeBot(2, "CCAddress", Ipv4AddressValue(bnh.GetBotMasterAddress(0)));
-    bnh.SetAttributeBot(2, "AttackInterval", TimeValue(Seconds(100.0)));
+    bnh.SetAttributeBot(2, "AttackInterval", TimeValue(Seconds(3.0)));
+    bnh.SetAttributeBot(2, "PacketSize", UintegerValue(3000));
 
     bnh.SetAttributeCC(0, "StartTime", TimeValue(Seconds(0.0)));
 

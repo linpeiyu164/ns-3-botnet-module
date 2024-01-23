@@ -166,7 +166,7 @@ void
 PulsingAttackBot::SendPacketCC(Ptr<Socket> socket)
 {
     NS_LOG_FUNCTION(this);
-    Ptr<Packet> packet = Create<Packet>(m_packet_size);
+    Ptr<Packet> packet = Create<Packet>(100);
     socket->Send(packet);
 }
 
