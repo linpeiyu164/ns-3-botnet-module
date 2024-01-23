@@ -326,6 +326,11 @@ BotnetHelper::GetBotMasterAddress(uint16_t netDeviceIndex)
         m_botnet->m_botMaster->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal());
 }
 
+uint32_t BotnetHelper::GetBotMasterNodeId()
+{
+    return m_botnet->m_botMaster->GetId();
+}
+
 ApplicationContainer
 BotnetHelper::ApplicationInstallBenign(std::vector<NodeContainer*>& vc) const
 {

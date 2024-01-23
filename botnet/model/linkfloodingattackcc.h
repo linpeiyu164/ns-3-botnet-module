@@ -29,6 +29,8 @@ class LinkFloodingAttackCC : public Application
 
     int GetMaxCount();
 
+    uint32_t GetCriticalNodeIndex();
+
   private:
     void CompleteWaitForTraceRoute();
 
@@ -48,6 +50,8 @@ class LinkFloodingAttackCC : public Application
     Ptr<Socket> m_listen_socket;
 
     uint16_t m_listen_port;
+
+    uint32_t m_critical_node_id;
 };
 } // namespace ns3
 #endif

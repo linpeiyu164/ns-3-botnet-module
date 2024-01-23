@@ -11,7 +11,6 @@
 #include "ns3/packet-sink-helper.h"
 #include "ns3/point-to-point-module.h"
 #include "ns3/v4traceroute-helper.h"
-
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE("LinkFloodingExample");
@@ -116,9 +115,12 @@ main(int argc, char* argv[])
     bnh.SetAttributeCC(0, "StopTime", TimeValue(stop_time));
     bnh.InstallApplications();
 
-    p2p.EnablePcap("link-flooding-attack", bnh.GetBot(1)->GetId(), 1);
-
+    NS_LOG_INFO("Bot master Address: " << bnh.GetBotMasterAddress(0)
+                                       << ", Bot master Node Id: " << bnh.GetBotMasterNodeId());
+    AsciiTraceHelper ascii;
+    p2p.EnableAsciiAll(ascii.CreateFileStream("link_flooding.tr"));
     Simulator::Run();
     Simulator::Destroy();
+
     return 0;
 }

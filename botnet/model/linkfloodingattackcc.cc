@@ -2,6 +2,7 @@
 
 #include "ns3/config.h"
 #include "ns3/ipv4-address-helper.h"
+#include "ns3/node-list.h"
 #include "ns3/simulator.h"
 #include "ns3/tcp-socket-factory.h"
 #include <ns3/uinteger.h>
@@ -65,16 +66,16 @@ LinkFloodingAttackCC::StopApplication()
 }
 
 void
-LinkFloodingAttackCC::RouteTraceCallback(std::string config, Ipv4Address route)
+LinkFloodingAttackCC::RouteTraceCallback(std::string config, Ipv4Address addr)
 {
-    NS_LOG_FUNCTION(this << route);
-    m_routers[route] += 1;
+    NS_LOG_FUNCTION(this << addr);
+    m_routers[addr] += 1;
 
-    if (m_routers[route] > m_max_hops)
+    if (m_routers[addr] > m_max_hops)
     {
-        NS_LOG_DEBUG("Updates MX address: " << route << ", MX count: " << m_routers[route]);
-        m_max_hops = m_routers[route];
-        m_max_address = route;
+        NS_LOG_DEBUG("Updates MX address: " << addr << ", MX count: " << m_routers[addr]);
+        m_max_hops = m_routers[addr];
+        m_max_address = addr;
     }
 }
 
@@ -102,6 +103,32 @@ LinkFloodingAttackCC::GetMaxCount()
 
     NS_LOG_INFO("Max hop count: " << m_max_hops);
     return m_max_hops;
+}
+
+uint32_t
+LinkFloodingAttackCC::GetCriticalNodeIndex()
+{
+    Ipv4Address maxaddress = GetMaxAddress();
+    for (NodeList::Iterator it = NodeList::Begin(); it != NodeList::End(); it++)
+    {
+        Ptr<Node> node = *it;
+        Ptr<Ipv4> ipv4 = node->GetObject<Ipv4>();
+
+        int32_t interface = ipv4->GetInterfaceForAddress(maxaddress);
+        if (interface == -1)
+        {
+            // max address is not found on this node
+            continue;
+        }
+        else
+        {
+            m_critical_node_id = node->GetId();
+            NS_LOG_INFO("Max address is found on node: " << node->GetId());
+            // max address is found on this node
+        }
+    }
+    NS_LOG_INFO("Critical Link NodeId: " << m_critical_node_id);
+    return m_critical_node_id;
 }
 
 void
@@ -132,6 +159,8 @@ LinkFloodingAttackCC::HandleAccept(Ptr<Socket> socket, const Address& address)
     // send out the target link address to the connected bots
 
     Ipv4Address target_address = GetMaxAddress();
+    LinkFloodingAttackCC::GetCriticalNodeIndex();
+
     uint32_t addr = target_address.Get();
     uint8_t* buffer = (uint8_t*)&addr;
     Ptr<Packet> packet = Create<Packet>(buffer, sizeof(buffer));

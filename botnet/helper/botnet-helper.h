@@ -85,6 +85,7 @@ class BotnetHelper
     void SetAttributeBot(uint16_t appIndex, std::string name, const AttributeValue& value);
     void SetAttributeBenign(uint16_t appIndex, std::string name, const AttributeValue& value);
     Ipv4Address GetBotMasterAddress(uint16_t netDeviceIndex);
+    uint32_t GetBotMasterNodeId();
 };
 
 } // namespace ns3
