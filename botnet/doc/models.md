@@ -25,7 +25,7 @@ Botnet contains information of the network nodes. Despite the naming, it include
 -   `ReceivePort`: The receiving port. Default value of 8000.
 -   `PacketSize`: Packet size of attack packets. Default value of 100.
 -   `TargetPort`: The target port that will receive the attack packets. Default value of
-    8081\.
+    8081.
 -   `TargetAddress`: Target address that will receive the attack packets.
 -   `CCAddress`: Central controller address.
 -   `Rounds`: The number of attack rounds.
@@ -41,6 +41,8 @@ Botnet contains information of the network nodes. Despite the naming, it include
 -   `RemotePort`: Port of the bot that will receive the command packet.
 -   `AttackTime`: The time gap between bot connection and attack. This value is needed
     because we have to wait for all bot connections to be finished.
+-   `AppIndexCC`: The index of the V4Ping application that pings CC. Default value 0.
+-   `AppIndexTarget`: The index of the V4Ping application that pings the target node. Default value 1.
 
 ## LinkFloodingAttack Related
 

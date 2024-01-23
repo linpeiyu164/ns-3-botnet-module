@@ -19,8 +19,11 @@ class PulsingAttackCC : public Application
     void StartApplication(); // inherited once when app starts
     void StopApplication();
 
-    static void CCRttTraceCallback(std::string context, Time rtt);
-    static void TargetRttTraceCallback(std::string context, Time rtt);
+    void CCRttTraceCallback(std::string context, Time rtt);
+    void TargetRttTraceCallback(std::string context, Time rtt);
+
+    void ConnectToRttSource(uint32_t appIndexCC, uint32_t appIndexTarget);
+
     static uint32_t ContextToNodeId(std::string context);
 
     inline static std::unordered_map<uint32_t, Time> m_ccRttTable;
@@ -64,6 +67,10 @@ class PulsingAttackCC : public Application
     std::vector<EventId> m_send_events;
 
     EventId m_schedule_bots_event;
+
+    uint32_t m_app_index_cc;
+
+    uint32_t m_app_index_target;
 };
 } // namespace ns3
 #endif /* ATTACK_H */

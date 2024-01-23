@@ -53,7 +53,8 @@ The overall procedure of a simulated pulsing attack is shown in the figure below
 4.  On receival of the signal from the central controller, the bots start to send attack
     packets periodically.
 
-[view example](../examples/botnet-example.cc)
+[view example 1](../examples/pulsing-example.cc)
+[view example 2](../examples/pulsing-example-2.cc)
 
 #### LinkFloodingAttack
 

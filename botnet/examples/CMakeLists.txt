@@ -1,6 +1,6 @@
 build_lib_example(
-    NAME botnet-example
-    SOURCE_FILES botnet-example.cc
+    NAME pulsing-example
+    SOURCE_FILES pulsing-example.cc
     LIBRARIES_TO_LINK
         ${libbrite}
         ${libinternet}
@@ -11,8 +11,8 @@ build_lib_example(
 )
 
 build_lib_example(
-    NAME botnet-example-2
-    SOURCE_FILES botnet-example-2.cc
+    NAME pulsing-example-2
+    SOURCE_FILES pulsing-example-2.cc
     LIBRARIES_TO_LINK
         ${libbrite}
         ${libinternet}

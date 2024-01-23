@@ -1,5 +1,6 @@
 #include "pulsingattackcc.h"
 
+#include "ns3/config.h"
 #include "ns3/internet-module.h"
 #include "ns3/ipv4-address-helper.h"
 #include "ns3/simulator.h"
@@ -16,29 +17,40 @@ NS_OBJECT_ENSURE_REGISTERED(PulsingAttackCC);
 TypeId
 PulsingAttackCC::GetTypeId()
 {
-    static TypeId tid = TypeId("ns3::PulsingAttackCC")
-                            .SetParent<Application>()
-                            .AddConstructor<PulsingAttackCC>()
-                            .AddAttribute("ReceivePort",
-                                          "Receiving port",
-                                          UintegerValue(8080),
-                                          MakeUintegerAccessor(&PulsingAttackCC::m_recv_port),
-                                          MakeUintegerChecker<uint16_t>())
-                            .AddAttribute("PacketSize",
-                                          "Packet size",
-                                          UintegerValue(100),
-                                          MakeUintegerAccessor(&PulsingAttackCC::m_packet_size),
-                                          MakeUintegerChecker<uint16_t>())
-                            .AddAttribute("RemotePort",
-                                          "Port of the node that will receive the packet",
-                                          UintegerValue(8081),
-                                          MakeUintegerAccessor(&PulsingAttackCC::m_remote_port),
-                                          MakeUintegerChecker<uint16_t>())
-                            .AddAttribute("AttackTime",
-                                          "Time between bot connection and attack",
-                                          TimeValue(Seconds(20.0)),
-                                          MakeTimeAccessor(&PulsingAttackCC::m_attack_time),
-                                          MakeTimeChecker());
+    static TypeId tid =
+        TypeId("ns3::PulsingAttackCC")
+            .SetParent<Application>()
+            .AddConstructor<PulsingAttackCC>()
+            .AddAttribute("ReceivePort",
+                          "Receiving port",
+                          UintegerValue(8080),
+                          MakeUintegerAccessor(&PulsingAttackCC::m_recv_port),
+                          MakeUintegerChecker<uint16_t>())
+            .AddAttribute("PacketSize",
+                          "Packet size",
+                          UintegerValue(100),
+                          MakeUintegerAccessor(&PulsingAttackCC::m_packet_size),
+                          MakeUintegerChecker<uint16_t>())
+            .AddAttribute("RemotePort",
+                          "Port of the node that will receive the packet",
+                          UintegerValue(8081),
+                          MakeUintegerAccessor(&PulsingAttackCC::m_remote_port),
+                          MakeUintegerChecker<uint16_t>())
+            .AddAttribute("AttackTime",
+                          "Time between bot connection and attack",
+                          TimeValue(Seconds(20.0)),
+                          MakeTimeAccessor(&PulsingAttackCC::m_attack_time),
+                          MakeTimeChecker())
+            .AddAttribute("AppIndexCC",
+                          "Index of the V4Ping application that pings CC",
+                          UintegerValue(0),
+                          MakeUintegerAccessor(&PulsingAttackCC::m_app_index_cc),
+                          MakeUintegerChecker<uint32_t>())
+            .AddAttribute("AppIndexTarget",
+                          "Index of the V4Ping application that pings the target",
+                          UintegerValue(1),
+                          MakeUintegerAccessor(&PulsingAttackCC::m_app_index_target),
+                          MakeUintegerChecker<uint32_t>());
 
     return tid;
 }
@@ -65,6 +77,9 @@ void
 PulsingAttackCC::StartApplication()
 {
     NS_LOG_FUNCTION(this);
+
+    ConnectToRttSource(m_app_index_cc, m_app_index_target);
+
     Ptr<Socket> socket = Socket::CreateSocket(GetNode(), TcpSocketFactory::GetTypeId());
     socket->SetAcceptCallback(MakeNullCallback<bool, Ptr<Socket>, const Address&>(),
                               MakeCallback(&PulsingAttackCC::HandleAccept, this));
@@ -130,6 +145,22 @@ PulsingAttackCC::ContextToNodeId(std::string context)
     std::string sub = context.substr(10);
     uint32_t pos = sub.find("/ApplicationList");
     return std::stoi(sub.substr(0, pos));
+}
+
+void
+PulsingAttackCC::ConnectToRttSource(uint32_t appIndexCC, uint32_t appIndexTarget)
+{
+    NS_LOG_FUNCTION(this);
+
+    /*Setup trace callback for Rtt*/
+    std::string pathToRttCC =
+        "/NodeList/*/ApplicationList/" + std::to_string(appIndexCC) + "/$ns3::V4Ping/Rtt";
+    std::string pathToRttTarget =
+        "/NodeList/*/ApplicationList/" + std::to_string(appIndexTarget) + "/$ns3::V4Ping/Rtt";
+
+    Config::Connect(pathToRttCC, MakeCallback(&PulsingAttackCC::CCRttTraceCallback, this));
+
+    Config::Connect(pathToRttTarget, MakeCallback(&PulsingAttackCC::TargetRttTraceCallback, this));
 }
 
 void
