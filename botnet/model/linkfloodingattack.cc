@@ -48,7 +48,7 @@ LinkFloodingAttack::GetTypeId()
                           MakeUintegerChecker<uint16_t>())
             .AddAttribute("Interval",
                           "Interval between sends",
-                          TimeValue(Seconds(2.0)),
+                          TimeValue(Seconds(1)),
                           MakeTimeAccessor(&LinkFloodingAttack::m_interval),
                           MakeTimeChecker())
             .AddAttribute("WaitForRouteMap",

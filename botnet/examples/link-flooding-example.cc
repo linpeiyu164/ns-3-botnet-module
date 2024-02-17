@@ -24,7 +24,7 @@ main(int argc, char* argv[])
     LogComponentEnable("LinkFloodingAttackCC", LOG_ALL);
     LogComponentEnable("PacketSink", LOG_ALL);
 
-    std::string confFile = "contrib/botnet/examples/conf_files/GUI_GEN_small.conf";
+    std::string confFile = "contrib/botnet/examples/conf_files/GUI_GEN_small2.conf";
 
     CommandLine cmd(__FILE__);
     cmd.AddValue("confFile", "BRITE conf file", confFile);
@@ -44,22 +44,6 @@ main(int argc, char* argv[])
     bth.AssignIpv4Addresses(address);
 
     NS_LOG_INFO("Num of AS created " << bth.GetNAs());
-
-    NodeContainer targetNetwork;
-    targetNetwork.Create(1);
-    int numLeaf = bth.GetNLeafNodesForAs(0);
-    targetNetwork.Add(bth.GetLeafNodeForAs(0, numLeaf - 1));
-
-    Ptr<Node> targetNode = targetNetwork.Get(0);
-    stack.Install(targetNode);
-
-    p2p.SetChannelAttribute("Delay", TimeValue(MilliSeconds(2.0)));
-    p2p.SetDeviceAttribute("DataRate", StringValue("10Kbps"));
-    NetDeviceContainer p2pTargetDevices = p2p.Install(targetNetwork);
-
-    Ipv4InterfaceContainer targetNetworkInterfaces;
-    targetNetworkInterfaces = address.Assign(p2pTargetDevices);
-    NS_LOG_DEBUG("Number of devices on target node: " << targetNode->GetNDevices());
 
     Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
@@ -92,12 +76,13 @@ main(int argc, char* argv[])
     // set the targeted address
     Time traceroute_wait_time = Seconds(2000);
     Time target_address_wait_time = Seconds(1000);
-    Time stop_time = Seconds(5000);
+    Time stop_time = Seconds(3100);
 
     bnh.SetAttributeBot(lfattack_index, "WaitForRouteMap", TimeValue(traceroute_wait_time));
     bnh.SetAttributeBot(lfattack_index, "WaitForReceive", TimeValue(target_address_wait_time));
     bnh.SetAttributeBot(lfattack_index, "StopTime", TimeValue(stop_time));
     bnh.SetAttributeBot(lfattack_index, "CCAddress", Ipv4AddressValue(bnh.GetBotMasterAddress(0)));
+    bnh.SetAttributeBot(lfattack_index, "PacketSize", UintegerValue(5000));
 
     // add packetsink applications on bots
     uint32_t packetsink_index = lfattack_index + 1;
@@ -112,13 +97,17 @@ main(int argc, char* argv[])
     // add cc applications on cc
     bnh.AddApplication(BotType::CENTRAL_CONTROLLER, "ns3::LinkFloodingAttackCC");
     bnh.SetAttributeCC(0, "WaitForTraceRoute", TimeValue(traceroute_wait_time));
-    bnh.SetAttributeCC(0, "StopTime", TimeValue(stop_time));
+    bnh.SetAttributeCC(0, "StopTime", TimeValue(stop_time+Seconds(200)));
     bnh.InstallApplications();
 
     NS_LOG_INFO("Bot master Address: " << bnh.GetBotMasterAddress(0)
                                        << ", Bot master Node Id: " << bnh.GetBotMasterNodeId());
+
+    // ascii trace for entire network into a trace file
+    // results can be analyzed using tracemetrics
     AsciiTraceHelper ascii;
     p2p.EnableAsciiAll(ascii.CreateFileStream("link_flooding.tr"));
+
     Simulator::Run();
     Simulator::Destroy();
 

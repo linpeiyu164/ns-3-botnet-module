@@ -3,6 +3,7 @@
 
 #include "ns3/application.h"
 #include "ns3/socket.h"
+#include "ns3/point-to-point-module.h"
 
 namespace ns3
 {
@@ -29,10 +30,14 @@ class LinkFloodingAttackCC : public Application
 
     int GetMaxCount();
 
-    uint32_t GetCriticalNodeIndex();
+    int32_t GetCriticalNodeIndex();
+
+    void PrintCriticalNodeStatistics();
 
   private:
     void CompleteWaitForTraceRoute();
+
+    void EnablePcapForCriticalNode();
 
     /* Handle connection requests */
     void HandleAccept(Ptr<Socket> socket, const Address& address);
@@ -51,7 +56,8 @@ class LinkFloodingAttackCC : public Application
 
     uint16_t m_listen_port;
 
-    uint32_t m_critical_node_id;
+    int32_t m_critical_node_id;
+
 };
 } // namespace ns3
 #endif

@@ -3,6 +3,7 @@
 #include "ns3/config.h"
 #include "ns3/ipv4-address-helper.h"
 #include "ns3/node-list.h"
+#include "ns3/point-to-point-module.h"
 #include "ns3/simulator.h"
 #include "ns3/tcp-socket-factory.h"
 #include <ns3/uinteger.h>
@@ -17,6 +18,7 @@ LinkFloodingAttackCC::LinkFloodingAttackCC()
 {
     NS_LOG_FUNCTION(this);
     m_max_hops = 0;
+    m_critical_node_id = -1;
 }
 
 LinkFloodingAttackCC::~LinkFloodingAttackCC()
@@ -105,7 +107,7 @@ LinkFloodingAttackCC::GetMaxCount()
     return m_max_hops;
 }
 
-uint32_t
+int32_t
 LinkFloodingAttackCC::GetCriticalNodeIndex()
 {
     Ipv4Address maxaddress = GetMaxAddress();
@@ -122,7 +124,7 @@ LinkFloodingAttackCC::GetCriticalNodeIndex()
         }
         else
         {
-            m_critical_node_id = node->GetId();
+            m_critical_node_id = (int32_t)node->GetId();
             NS_LOG_INFO("Max address is found on node: " << node->GetId());
             // max address is found on this node
         }
@@ -159,12 +161,34 @@ LinkFloodingAttackCC::HandleAccept(Ptr<Socket> socket, const Address& address)
     // send out the target link address to the connected bots
 
     Ipv4Address target_address = GetMaxAddress();
-    LinkFloodingAttackCC::GetCriticalNodeIndex();
+
+    while (m_critical_node_id == -1)
+    {
+        target_address = GetMaxAddress();
+        GetCriticalNodeIndex();
+    }
+
+    EnablePcapForCriticalNode();
 
     uint32_t addr = target_address.Get();
     uint8_t* buffer = (uint8_t*)&addr;
     Ptr<Packet> packet = Create<Packet>(buffer, sizeof(buffer));
     socket->Send(packet);
+}
+
+void
+LinkFloodingAttackCC::EnablePcapForCriticalNode()
+{
+    for (NodeList::Iterator it = NodeList::Begin(); it != NodeList::End(); it++)
+    {
+        Ptr<Node> node = *it;
+        if ((int32_t)node->GetId() == m_critical_node_id)
+        {
+            PointToPointHelper p2p;
+            p2p.EnablePcap("link-flooding", m_critical_node_id, 1);
+            break;
+        }
+    }
 }
 
 } // namespace ns3
