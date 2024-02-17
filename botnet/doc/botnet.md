@@ -56,6 +56,10 @@ The overall procedure of a simulated pulsing attack is shown in the figure below
 [view example 1](../examples/pulsing-example.cc)
 [view example 2](../examples/pulsing-example-2.cc)
 
+Simulation Result:
+![image](figures/pulsing-attack-result.png)
+The example attack produces a pulse width of around 2 seconds. Error packets can be observed at the traffic pulses. The pulse width can be controlled by adjusting the link bandwidth. The larger the link bandwidth, the smaller the pulse width. However, currently 2 seconds is the minimized result.
+
 #### LinkFloodingAttack
 
 The overall procedure of a simulated link flooding attack  is shown in the figure below:
@@ -78,6 +82,15 @@ The overall procedure of a simulated link flooding attack  is shown in the figur
     link.
 
 [view example](../examples/link-flooding-example.cc)
+
+Simulation Result:
+
+Analyze **link-flooding.tr** with tracemetrics, we can see that the critical link has the most traffic throughput among all nodes, however, it is not enough to cause packet drops in the example. This may be because there are not enough bots using the critical node.
+![image](../doc/figures/link-flooding-attack-trace.png)
+
+The packet trace obtained at the critical link, the time in the packet trace file starts later since the trace callback is set after the start of the simulation:
+![image](../doc/figures/link-flooding-attack-result.png)
+
 
 ### Benign Traffic
 
