@@ -1,2 +1,2 @@
 # Include specific files that should be tracked by Git
-*/linkflooding.tr
+tools/linkflooding/link_flooding.tr
